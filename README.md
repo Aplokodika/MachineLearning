@@ -11,7 +11,7 @@ Enhanced efficiency of a software in adapting to newer scenarios greatly depends
 Numerous code specialized for various purposes are written each day to meet up with the changes taking place in this world. Every new technology that is created go off-trend before we can totally comprehend the change. This forces numerous software companies and organizations to adapt to such changes at a faster rate. The more simpler the code is, the more faster it can be used to adapt. The ultimate goal of Aplokodika is developing tools for developers which in turn helps them implement their design as quickly as possible. 
 
 
-#Basic methodologies for attaining this goal (July 5, 2016. by K Sreram): 
+#Basic methodologies for attaining this goal (July 5, 2016.): 
 
 Note: these methods are dynamic and are subject to changes often. 
 
