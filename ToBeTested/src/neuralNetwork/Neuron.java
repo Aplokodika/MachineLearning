@@ -6,34 +6,55 @@ package neuralNetwork;
 
 import java.util.*;
 
-/*
+/**
  * This is the class containing the neuron structure. 
  * It has the `activation function` as abstract, to provide the possibility
  * of defining an unique activation function for each neuron if needed.
  * The activation function in this class returns a particular value, which 
  * is considered as the output of this neuron and becomes a part of the input
  * to the successive neuron.  
+ * 
+ * For input neurons, there won't be any parent neurons, and for output neurons
+ * there won't be any child neurons. 
+ * 
+ * The link back to the parent neuron is required to make back-tracking feasible. 
 */
 abstract public class Neuron implements Factory<Neuron>{
 	
 	Factory<Neuron> factory;
 	
 	public Neuron(Factory<Neuron> fact){
-		neuronIndex = new Integer(curUnusedIndex.intValue());
+		setFactory(fact);
+	}
+	
+	public void setFactory(Factory<Neuron> fact){
+		neuronIndex = newNeuronIndex();
 		factory = fact;
+	}
+	
+	public Neuron(){
+		
 	}
 	public static void reset(Integer setVal){
 		curUnusedIndex = new Integer(setVal.intValue());
 	}
 
+	/**	newNeuronIndex
+	 *  ==============
+	 *  This returns a new index each time this method is invoked. 
+	 */
 	public static Integer newNeuronIndex(){
 		Integer result = new Integer(curUnusedIndex.intValue());
 		curUnusedIndex = new Integer(curUnusedIndex.intValue() + 1);
 		return result;
 	}
 	
+	// This collectively stores the parent neurons, to enable back-tracking. 
 	public Map<Integer, Neuron> parentNeurons = new HashMap<Integer, Neuron>();
 	
+	// holds the next unused Index for the neurons. Each time it is used, 
+	// the index increments. This ensures that each neurons will get a unique 
+	// index value. 
 	public static Integer curUnusedIndex;
 		
 	// the index of the current layer. 
@@ -60,10 +81,12 @@ abstract public class Neuron implements Factory<Neuron>{
 	
 	// null in case of root node
 
-	// The following stores the previous values.
-	// calling function updateWeight..
-	// causes the weight modification
-	// to be reversed
+	/**
+	 * The following stores the previous values.
+	 * calling function updateWeight..
+	 * causes the weight modification
+	 * to be reversed
+	*/
 	private Float previousWeight;
 	private Integer previousIndex;
 	
@@ -72,7 +95,7 @@ abstract public class Neuron implements Factory<Neuron>{
 	}
 	
 
-	/* updateWeight
+	/** updateWeight
 	 * =========== 
 	 * The variable 'weightValues' stores the weight values of each of the 
 	 * links to the next consecutive nodes. The following method updates 
@@ -90,7 +113,7 @@ abstract public class Neuron implements Factory<Neuron>{
 
 	}
 
-	/* reverseUpdate
+	/** reverseUpdate
 	 * =============
 	 * This method reverses the modification previously done on the weight
 	 * values.
@@ -105,7 +128,7 @@ abstract public class Neuron implements Factory<Neuron>{
 
 	}
 
-	/* addNeuron
+	/** addNeuron
 	 * =========
 	 * This connects another neuron to the current neuron. the current 
 	 * neuron is preceded by the newer neuron. This neural network 
@@ -129,7 +152,9 @@ abstract public class Neuron implements Factory<Neuron>{
 	}
 	
 	
-	
+	/*
+	 * 
+	 */
 	public void pullInput(){
 		input = new Float(0);
 		for(Map.Entry<Integer, Neuron> entry: parentNeurons.entrySet()){
