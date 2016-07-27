@@ -1,6 +1,6 @@
 package neuralNetwork;
 
-public class constructNetwork <neuralNode> implements neuralNet<neuralNode> {
+public class constructNetwork <NeuronWithFnc extends Neuron>  {
 
 	
 }
