@@ -15,8 +15,6 @@ Numerous programs specialized for various purposes are written each day to meet 
 
 Note: these methods are dynamic and are subject to changes often. 
 
-Status: experimental. 
-
 1. When referred to the “development process” this article refers to the exact set of steps taken by the developer in creating a component. 
 2. When referred to “logging development process”, this article refers to the code that was added, deleted and retained by the developer. It is a strict log on what the developers had in their mind while writing a particular code. This generally goes beyond the level of documentation. It must also include the time-line of the developer's learning process as he codes. 
 
