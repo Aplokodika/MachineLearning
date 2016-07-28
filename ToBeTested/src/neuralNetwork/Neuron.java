@@ -18,7 +18,7 @@
  * Authors contributing to this project owns the piece of code they write. That is, Aplokodika does
  * not claim to own the copyright to the content contributed by an author unless the rights are 
  * explicitly transfered. By modifying/creating/contributing to this project, the authors agree 
- * that they grant Aplokodika organization free license to store, modify, share, 
+ * to grant Aplokodika organization free license to store, modify, share, 
  * sell, republish and grant such license to third parties without any cost or conditions.      
  */
 package neuralNetwork;
