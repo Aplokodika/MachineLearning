@@ -5,8 +5,8 @@
  * Developer License Agreement.
  * ..............................
  * 
- * Members of Aplokodika may update the following source and may save it with their name
- * added to the list of authors and copyright holders. The members of Aplokodika may modify, 
+ * Members of Aplokodika may update the following source and may claim the ownership of
+ * copyright to the source they contribute. The members of Aplokodika may modify, 
  * create or alter a whole or a part of the following code with consent from the 
  * majority of the copyright holders of the source code. Each modification must be 
  * documented and notified, with appropriate identity information of the author who helped 
