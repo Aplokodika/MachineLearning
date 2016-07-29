@@ -43,18 +43,7 @@ import java.util.*;
  * 
  * The link back to the parent neuron is required to make back-tracking feasible. 
 */
-abstract public class Neuron implements Factory<Neuron>{
-	
-	Factory<Neuron> factory;
-	
-	public Neuron(Factory<Neuron> fact){
-		setFactory(fact);
-	}
-	
-	public void setFactory(Factory<Neuron> fact){
-		neuronIndex = newNeuronIndex();
-		factory = fact;
-	}
+public class Neuron {
 	
 	public Neuron(){
 		this.neuronIndex = newNeuronIndex();
@@ -87,7 +76,11 @@ abstract public class Neuron implements Factory<Neuron>{
 	
 	
 	// The activation function of the neuron.
-	abstract public Float activation(Float inValue);
+	public Activation activation;
+	
+	void setActivationFnc(Activation act){
+		activation = act;
+	}
 
 	// Neuron's input: This is the summation of output from each of the
 	// previous layer neuron's output times the corresponding connecting
@@ -119,7 +112,7 @@ abstract public class Neuron implements Factory<Neuron>{
 	private Integer previousIndex;
 	
 	public Neuron generateNewNeuron(){
-		return factory.newElement();
+		return new Neuron();
 	}
 	
 
@@ -202,7 +195,7 @@ abstract public class Neuron implements Factory<Neuron>{
 	 * `outputResult`.
 	 */
 	public void computeOutput(){
-		outputResult = activation(new Float(input));
+		outputResult = activation.activation(input);
 	}
 		
 		

@@ -30,7 +30,7 @@ package neuralNetwork;
 
 import java.util.*;
 
-public class NeuralNetwork<NeuronWithFnc extends Neuron> {
+public class NeuralNetwork {
 
 	public static enum MoveOrder {
 		moveForward, moveBackward
@@ -38,16 +38,16 @@ public class NeuralNetwork<NeuronWithFnc extends Neuron> {
 
 	public boolean constructStatus = false;
 
-	public NetworkData<NeuronWithFnc> networkData;
+	public NetworkData networkData;
 
 	// public Float learningRate;
 
 	// public Float momentum;
 
-	ComputeError<NeuronWithFnc> errorFunction;
+	ComputeError errorFunction;
 
-	NeuralNetwork(Factory<NeuronWithFnc> fact, ComputeError<NeuronWithFnc> errFnc) {
-		networkData = new NetworkData<NeuronWithFnc>(fact);
+	NeuralNetwork(ComputeError errFnc) {
+		networkData = new NetworkData();
 		errorFunction = errFnc;
 	}
 

@@ -32,30 +32,27 @@ import java.util.ArrayList;
 
 
 
-public class ConstructNetwork <NeuronWithFnc extends Neuron>  {
+public class ConstructNetwork  {
 
-	public Factory<NeuronWithFnc> factory;
-	
-	public ConstructNetwork(Factory<NeuronWithFnc> fact, 
-			ComputeError<NeuronWithFnc> errFnc, ArrayList<Integer> sizeList){
-		factory = fact;
-		NNetwork = new NeuralNetwork<NeuronWithFnc>(factory, errFnc);
-		NNetwork.networkData.initializeNeurons(sizeList);
+	public ConstructNetwork( ArrayList<Activation> act, 
+			ComputeError errFnc, ArrayList<Integer> sizeList){
+		NNetwork = new NeuralNetwork(errFnc);
+		NNetwork.networkData.initializeNeurons(sizeList, act);
 	}
 	
-	public NeuralNetwork<NeuronWithFnc> NNetwork; 
+	public NeuralNetwork NNetwork; 
 	
 	public static void formWeightLinks(ArrayList<Neuron> layer1, ArrayList<Neuron> layer2,
 			WeightPair wPair)throws Exception{
 		
 		for(int i = 0; i < layer1.size(); i++){
 			for(int j = 0; j < layer2.size(); j++){
-				if(wPair.weight.get(wPair.index) == null){
+				if(wPair.index == wPair.weight.size()  ){
 					Exception e = new Exception("Error in formWeightLinks: not enough"
 							+ " weight values in array");
 					throw e;
 				}
-				 layer1.get(i).addNeuron( layer2.get(j), wPair.weight.get(wPair.index));
+				layer1.get(i).addNeuron( layer2.get(j), wPair.weight.get(wPair.index));
 				 wPair.index++;
 			}
 		}
@@ -89,6 +86,13 @@ public class ConstructNetwork <NeuronWithFnc extends Neuron>  {
 				NNetwork.networkData.outputNeurons, wPair);
 		
 		NNetwork.constructStatus = true;
+	}
+	
+	public static int noOfNeurons(ArrayList<Integer> layerSize){
+		int result = 0;
+		for(int i = 0; i < layerSize.size(); i++)
+			result = result + layerSize.get(i);
+		return result;
 	}
 	
 }

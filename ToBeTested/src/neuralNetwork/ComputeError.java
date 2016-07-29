@@ -30,7 +30,7 @@ package neuralNetwork;
 
 import java.util.ArrayList;
 
-public interface ComputeError <NeuronWithFnc extends Neuron>{
+public interface ComputeError{
 	Float computeError(ArrayList<Float> expectedOut, ArrayList<Float> obtainedOut);
 }
 
