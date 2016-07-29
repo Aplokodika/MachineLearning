@@ -15,13 +15,17 @@
  * By contributing to this code, you agree to grant Aplokodika free license to store, modify, share, 
  * sell, republish and grant such license to third parties without any cost or conditions. 
  * 
- * Authors contributing to this project owns the piece of code they write. That is, Aplokodika does
+ * Authors contributing to this project own the code they write. That is, Aplokodika does
  * not claim to own the copyright to the content contributed by an author unless the rights are 
- * explicitly transfered. By modifying/creating/contributing to this project, the authors agree 
- * to grant Aplokodika organization free license to store, modify, share, 
- * sell, republish and grant such license to third parties without any cost or conditions.      
+ * explicitly transfered. By modifying/creating/contributing to this project, the authors/copyright
+ * holders agree to grant Aplokodika organization free license to store, modify, share, sell, republish
+ * this software, as source or as a binary release and the authors also agree that Aplokodika may grant
+ * such license to third parties.
+ * 
+ * The authors contributing to this software also agree that, Aplokodika reserves the rights to 
+ * modify this license at will, and modifications may not be notified instantly. All notification 
+ * mechanisms used to notify such changes are only for the ease of reference.  
  */
-
 package neuralNetwork;
 
 import java.util.ArrayList;
@@ -40,7 +44,7 @@ public class NetworkData <NeuronWithFnc extends Neuron>{
 	public ArrayList <ArrayList<Neuron>> hiddenLayers = new ArrayList <ArrayList<Neuron>>();
 	
 	NetworkData(Factory<NeuronWithFnc> fact){
-		factory = fact;
+		this.factory = fact;
 	}
 	
 	
@@ -54,9 +58,9 @@ public class NetworkData <NeuronWithFnc extends Neuron>{
 		
 		// for the hidden layers
 		for (int i = 0; i < endSize - 1; i++){
-			hiddenLayers.add(i-1, new ArrayList<Neuron>());
+			hiddenLayers.add(i, new ArrayList<Neuron>());
 			for(int j = 0; j < sizeList.get(i); j++){
-				hiddenLayers.get(i-1).add(factory.newElement());
+				hiddenLayers.get(i).add(factory.newElement());
 			}
 		}
 		
@@ -77,9 +81,9 @@ public class NetworkData <NeuronWithFnc extends Neuron>{
 	public void setInput(ArrayList<Float> inp){
 		initializedInputs = true;
 		for(int index = 0; index < inp.size(); index++){
-			inputNeurons.get(index).input = 
-					inputNeurons.get(index).outputResult = 
-						new Float(inp.get(index));
+			inputNeurons.get(index).input = inputNeurons.get(index).outputResult 
+						= new Float(inp.get(index));
+			inputNeurons.get(index).parentNeurons = null;
 		}
 	}
 	

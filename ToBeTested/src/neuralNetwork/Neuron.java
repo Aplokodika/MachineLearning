@@ -15,11 +15,16 @@
  * By contributing to this code, you agree to grant Aplokodika free license to store, modify, share, 
  * sell, republish and grant such license to third parties without any cost or conditions. 
  * 
- * Authors contributing to this project owns the piece of code they write. That is, Aplokodika does
+ * Authors contributing to this project own the code they write. That is, Aplokodika does
  * not claim to own the copyright to the content contributed by an author unless the rights are 
- * explicitly transfered. By modifying/creating/contributing to this project, the authors agree 
- * to grant Aplokodika organization free license to store, modify, share, 
- * sell, republish and grant such license to third parties without any cost or conditions.      
+ * explicitly transfered. By modifying/creating/contributing to this project, the authors/copyright
+ * holders agree to grant Aplokodika organization free license to store, modify, share, sell, republish
+ * this software, as source or as a binary release and the authors also agree that Aplokodika may grant
+ * such license to third parties.
+ * 
+ * The authors contributing to this software also agree that, Aplokodika reserves the rights to 
+ * modify this license at will, and modifications may not be notified instantly. All notification 
+ * mechanisms used to notify such changes are only for the ease of reference.  
  */
 package neuralNetwork;
 
@@ -52,7 +57,7 @@ abstract public class Neuron implements Factory<Neuron>{
 	}
 	
 	public Neuron(){
-		
+		this.neuronIndex = newNeuronIndex();
 	}
 	public static void reset(Integer setVal){
 		curUnusedIndex = new Integer(setVal.intValue());
@@ -63,13 +68,14 @@ abstract public class Neuron implements Factory<Neuron>{
 	 *  This returns a new index each time this method is invoked. 
 	 */
 	public static Integer newNeuronIndex(){
+		if(curUnusedIndex == null){
+			curUnusedIndex = new Integer(0);
+		}
 		Integer result = new Integer(curUnusedIndex.intValue());
 		curUnusedIndex = new Integer(curUnusedIndex.intValue() + 1);
 		return result;
 	}
 	
-	// This collectively stores the parent neurons, to enable back-tracking. 
-	public Map<Integer, Neuron> parentNeurons = new HashMap<Integer, Neuron>();
 	
 	// holds the next unused Index for the neurons. Each time it is used, 
 	// the index increments. This ensures that each neurons will get a unique 
@@ -91,11 +97,14 @@ abstract public class Neuron implements Factory<Neuron>{
 	// stores the output of the activation function.
 	public Float outputResult;
 
+	// This collectively stores the parent neurons, to enable back-tracking. 
+	public ArrayList<Neuron> parentNeurons = new ArrayList<Neuron>();
+	
 	// The weight values of the forward neurons
 	public Map<Integer, Float> weightValues = new HashMap<Integer, Float>();
 
 	// Link to the next neurons (forward).
-	public Map<Integer, Neuron> childNeurons = new HashMap<Integer, Neuron>();
+	public ArrayList<Neuron> childNeurons = new ArrayList<Neuron>();
 
 	
 	// null in case of root node
@@ -163,11 +172,9 @@ abstract public class Neuron implements Factory<Neuron>{
 	 * 		      by index.     
 	 */
 	public void addNeuron(Neuron neuron, Float weight){
-		Integer index = newNeuronIndex();
-		neuron.neuronIndex = index;
-		weightValues.put(index, new Float(weight));
-		childNeurons.put(index, neuron); 
-		neuron.parentNeurons.put(neuronIndex, this);
+		this.weightValues.put(neuron.neuronIndex, weight);
+		this.childNeurons.add(neuron); 
+		neuron.parentNeurons.add(this);
 	}
 	
 	
@@ -179,12 +186,14 @@ abstract public class Neuron implements Factory<Neuron>{
 	 */
 	public void pullInput(){
 		input = new Float(0);
-		for(Map.Entry<Integer, Neuron> entry: parentNeurons.entrySet()){
+		if (parentNeurons == null) return; // the case when these are input neurons
+		
+		for(int i = 0; i < parentNeurons.size(); i++){
 			
 			input = new Float(
 					input.floatValue() + 
-					(entry.getValue().weightValues.get(neuronIndex).floatValue()*
-					 entry.getValue().outputResult.floatValue())
+					(parentNeurons.get(i).weightValues.get(this.neuronIndex.intValue()).floatValue()*
+					 parentNeurons.get(i).outputResult.floatValue())
 					);
 		}
 	}
