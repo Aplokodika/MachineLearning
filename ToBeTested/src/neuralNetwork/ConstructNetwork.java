@@ -15,11 +15,16 @@
  * By contributing to this code, you agree to grant Aplokodika free license to store, modify, share, 
  * sell, republish and grant such license to third parties without any cost or conditions. 
  * 
- * Authors contributing to this project owns the piece of code they write. That is, Aplokodika does
+ * Authors contributing to this project own the code they write. That is, Aplokodika does
  * not claim to own the copyright to the content contributed by an author unless the rights are 
- * explicitly transfered. By modifying/creating/contributing to this project, the authors agree 
- * to grant Aplokodika organization free license to store, modify, share, 
- * sell, republish and grant such license to third parties without any cost or conditions.      
+ * explicitly transfered. By modifying/creating/contributing to this project, the authors/copyright
+ * holders agree to grant Aplokodika organization free license to store, modify, share, sell, republish
+ * this software, as source or as a binary release and the authors also agree that Aplokodika may grant
+ * such license to third parties.
+ * 
+ * The authors contributing to this software also agree that, Aplokodika reserves the rights to 
+ * modify this license at will, and modifications may not be notified instantly. All notification 
+ * mechanisms used to notify such changes are only for the ease of reference.  
  */
 package neuralNetwork;
 
@@ -27,18 +32,20 @@ import java.util.ArrayList;
 
 
 
-public class constructNetwork <NeuronWithFnc extends Neuron>  {
+public class ConstructNetwork <NeuronWithFnc extends Neuron>  {
 
 	public Factory<NeuronWithFnc> factory;
 	
-	constructNetwork(Factory<NeuronWithFnc> fact, ComputeError<NeuronWithFnc> errFnc){
+	public ConstructNetwork(Factory<NeuronWithFnc> fact, 
+			ComputeError<NeuronWithFnc> errFnc, ArrayList<Integer> sizeList){
 		factory = fact;
 		NNetwork = new NeuralNetwork<NeuronWithFnc>(factory, errFnc);
+		NNetwork.networkData.initializeNeurons(sizeList);
 	}
 	
 	public NeuralNetwork<NeuronWithFnc> NNetwork; 
 	
-	public void formWeightLinks(ArrayList<Neuron> layer1, ArrayList<Neuron> layer2,
+	public static void formWeightLinks(ArrayList<Neuron> layer1, ArrayList<Neuron> layer2,
 			WeightPair wPair)throws Exception{
 		
 		for(int i = 0; i < layer1.size(); i++){
@@ -52,6 +59,14 @@ public class constructNetwork <NeuronWithFnc extends Neuron>  {
 				 wPair.index++;
 			}
 		}
+	}
+	
+	public static int weightPairSize(ArrayList<Integer> sizeList){
+		int result = 0;
+		for(int i = 0; i < sizeList.size() - 1; i++){
+			result = sizeList.get(i).intValue()*sizeList.get(i + 1) + result;
+		}
+		return result;
 	}
 	
 	public void constructNetworkLayered(ArrayList<Integer> size, WeightPair wPair) throws Exception{
@@ -73,5 +88,7 @@ public class constructNetwork <NeuronWithFnc extends Neuron>  {
 		formWeightLinks(NNetwork.networkData.hiddenLayers.get(maxHidden-1), 
 				NNetwork.networkData.outputNeurons, wPair);
 		
+		NNetwork.constructStatus = true;
 	}
+	
 }
