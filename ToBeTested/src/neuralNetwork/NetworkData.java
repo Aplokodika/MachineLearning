@@ -72,7 +72,7 @@ public class NetworkData{
 		for(int index = 0; index < inp.size(); index++){
 			inputNeurons.get(index).input = inputNeurons.get(index).outputResult 
 						= new Float(inp.get(index));
-			inputNeurons.get(index).parentNeurons = null;
+			//inputNeurons.get(index).parentNeurons = null;
 		}
 	}
 	

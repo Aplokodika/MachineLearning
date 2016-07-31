@@ -7,6 +7,6 @@ package neuralNetwork;
 import java.util.ArrayList;
 
 public interface ComputeError{
-	Float computeError(ArrayList<Float> expectedOut, ArrayList<Float> obtainedOut);
+	Float computeError(ArrayList <Float> expectedOut, ArrayList<Float> obtainedOut);
 }
 

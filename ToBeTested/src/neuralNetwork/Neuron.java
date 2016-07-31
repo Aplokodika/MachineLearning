@@ -70,14 +70,32 @@ public class Neuron {
 	public ArrayList<Neuron> parentNeurons = new ArrayList<Neuron>();
 	
 	// The weight values of the forward neurons
-	public Map<Integer, Float> weightValues = new HashMap<Integer, Float>();
+	private Map<Integer, Float> weightValues = new HashMap<Integer, Float>();
+	
+	public Float getWeight(Integer index){
+		return weightValues.get(index);
+	}
+	
+	/**
+	 * The previous weight values
+	 * 
+	 * */
+	
+	private Map<Integer, Float> preWeightValues = new HashMap<Integer, Float>();
 
+	public  Float getPreWeight(Integer index) {
+		return preWeightValues.get(index);
+	}
+	
 	// Link to the next neurons (forward).
 	public ArrayList<Neuron> childNeurons = new ArrayList<Neuron>();
 
 	
-	// null in case of root node
-
+	public Float learningRate;
+	public Float momentum;
+	
+	
+	
 	/**
 	 * The following stores the previous values.
 	 * calling function updateWeight..
@@ -86,6 +104,9 @@ public class Neuron {
 	*/
 	private Float previousWeight;
 	private Integer previousIndex;
+	
+	private Float prePreviousWeight;
+	private Integer prePreviousIndex;
 	
 	public Neuron generateNewNeuron(){
 		return new Neuron();
@@ -103,7 +124,15 @@ public class Neuron {
 	 * 			 positive).  
 	 * */
 	public void updateWeight(Integer index, Float change) {
-		previousWeight = new Float(weightValues.get(index.intValue()));
+		previousWeight = weightValues.get(index.intValue());
+		previousIndex = index;
+				
+		if(preWeightValues.get(index) != null){
+			prePreviousWeight = preWeightValues.get(index);
+			prePreviousIndex = index;
+			preWeightValues.put(index, weightValues.get(index));
+
+		}
 		
 		weightValues.put(index, 
 							previousWeight.floatValue() + change.floatValue());
@@ -120,13 +149,17 @@ public class Neuron {
 		if (previousWeight == null)
 			return;
 		weightValues.put(previousIndex, previousWeight.floatValue());
+		if(prePreviousWeight != null){
+			preWeightValues.put(prePreviousIndex, prePreviousWeight);
+		}
 		previousWeight = null;
 		previousIndex = null;
+		prePreviousWeight = null;
+		prePreviousIndex = null;
 
 	}
 
-	/** addNeuron
-	 * =========
+	/**
 	 * This connects another neuron to the current neuron. the current 
 	 * neuron is preceded by the newer neuron. This neural network 
 	 * architecture has each of the succeeding neurons connected to each
@@ -140,10 +173,52 @@ public class Neuron {
 	 * 			  address in the layer they are present. This purpose is served
 	 * 		      by index.     
 	 */
-	public void addNeuron(Neuron neuron, Float weight){
-		this.weightValues.put(neuron.neuronIndex, weight);
-		this.childNeurons.add(neuron); 
+	public void connectWith(Neuron neuron, Float weight){
+		preWeightValues.put(neuron.neuronIndex, weight);
+		weightValues.put(neuron.neuronIndex, weight);
+		childNeurons.add(neuron); 
 		neuron.parentNeurons.add(this);
+	}
+	
+	
+	public int findParentIndex(Neuron neuron) throws Exception{
+		int i = 0;
+		while(parentNeurons.get(i) !=neuron){
+			i++;
+			if( i == parentNeurons.size()) {
+				Exception e = new Exception("Error: neuron not found in the list of child neurons from" 
+						+ this);
+				throw e;
+			}
+		}
+		return i;
+	}
+	
+	private int findChildIndex(Neuron neuron) throws Exception{
+		int i = 0;
+		while(childNeurons.get(i) !=neuron){
+			i++;
+			if( i == childNeurons.size()) {
+				Exception e = new Exception("Error: neuron not found in the list of child neurons from" 
+						+ this);
+				throw e;
+			}
+		}
+		return i;
+	}
+	
+	public void disconnectWith(Neuron neuron) throws Exception{
+		int i, j;
+		preWeightValues.remove(neuron.neuronIndex);
+		weightValues.remove(neuron.neuronIndex);
+	 
+		
+		i = findChildIndex(neuron);
+		j = childNeurons.get(i).findParentIndex(this);
+		
+		childNeurons.get(i).parentNeurons.remove(j);
+		childNeurons.remove(i);
+		
 	}
 	
 	
@@ -173,6 +248,8 @@ public class Neuron {
 	public void computeOutput(){
 		outputResult = activation.activation(input);
 	}
+	
+
 		
 		
 }

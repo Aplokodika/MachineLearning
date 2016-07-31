@@ -28,7 +28,7 @@ public class ConstructNetwork  {
 							+ " weight values in array");
 					throw e;
 				}
-				layer1.get(i).addNeuron( layer2.get(j), wPair.weight.get(wPair.index));
+				layer1.get(i).connectWith( layer2.get(j), wPair.weight.get(wPair.index));
 				 wPair.index++;
 			}
 		}
