@@ -21,7 +21,8 @@ public class NeuralTrainer {
 	}
 
 	private ChangeWeight checkChange(Float changeErrorAdd, Float changeErrorSub, Float neuronError) {
-		if (changeErrorAdd.floatValue() < neuronError.floatValue()) {
+		
+		if (changeErrorAdd.floatValue() < neuronError.floatValue()) {		
 			if (changeErrorSub.floatValue() < neuronError.floatValue()) {
 				if (changeErrorAdd.floatValue() < changeErrorSub.floatValue()) {
 					return ChangeWeight.increaseWeight;
@@ -37,12 +38,27 @@ public class NeuralTrainer {
 		return ChangeWeight.noChange;
 	}
 
-	/**
-	 * This method is called right after compute network result is called.
+	private Float positiveValue(Float val){
+		if(val.floatValue() < 0)
+			return new Float(-val.floatValue());
+		return val;
+	}
+	
+	/**This is a part of the traditional network. 
+	 * 
+	 * This method is called right after compute network result is called. 
+	 * This trains by modifying the connections to a single neuron from a neuron 
+	 * from the previous layer. 
+	 * 
+	 * The following algorithm involves a lot of computation process. It is not 
+	 * possible to speculate which gradient descend operation might be optimal because, 
+	 * this network's algorithm accepts various kinds of activation functions 
+	 * to be used for each neuron. 
+	 * 
 	 * @param
 	 * 	neuron - the neuron's connecting weight to be modified
 	 * @param 
-	 *  neuronLayer - the previous layer to which the current neuron is present.
+	 *  neuronLayer - the layer in which the current neuron is present.
 	 *  			  This value cannot exceed the maximum size of the hidden layer 
 	 * @param
 	 * 	expectedOutput- the expected output of the neural network system
@@ -59,14 +75,17 @@ public class NeuralTrainer {
 		Float change;
 		
 		for (int i = 0; i < neuron.parentNeurons.size(); i++) {
-			if (neuron.getPreWeight(neuron.neuronIndex) != null) {
-				preNeuron = neuron.parentNeurons.get(i);
-				change = new Float(neuron.learningRate.floatValue() * neuronError.floatValue()
-						+ neuron.momentum * (preNeuron.getPreWeight(neuron.neuronIndex))
-						- preNeuron.getWeight(neuron.neuronIndex));
+			preNeuron = neuron.parentNeurons.get(i);
+			if (preNeuron.getPreWeight(neuron.neuronIndex) != null) {
+				change = new Float((neuron.learningRate.floatValue() * neuronError.floatValue()
+							/positiveValue(preNeuron.getWeight(neuron.neuronIndex).floatValue())
+						+ neuron.momentum.floatValue() 
+						* (preNeuron.getPreWeight(neuron.neuronIndex).floatValue()))
+						- preNeuron.getWeight(neuron.neuronIndex)).floatValue();
 			} else {
 				preNeuron = neuron.parentNeurons.get(i);
-				change = new Float(neuron.learningRate.floatValue() * neuronError.floatValue());
+				change = new Float(neuron.learningRate.floatValue() * neuronError.floatValue()
+						/ positiveValue(preNeuron.getWeight(neuron.neuronIndex)));
 			}
 			preNeuron.updateWeight(neuron.neuronIndex, change);
 			NNetwork.computeNetworkResult(neuronLayer, MoveOrder.moveForward);// finds the result 
@@ -92,8 +111,32 @@ public class NeuralTrainer {
 		}
 	}
 	
+	/**
+	 * This is the traditional train-network method
+	 * @param expectedOutput - 
+	 * 			this it the set of all outputs that correlate with the given input. This is the 
+	 * 			output that we expect to obtain. 
+	 * @throws Exception
+	 */
 	
-
+	public void trainNetwork(ArrayList<Float> expectedOutput) throws Exception{
+		Neuron tempNeuron;
+		for(int layerIndex = 0; layerIndex < NNetwork.networkData.hiddenLayers.size();
+				layerIndex++){
+			for(int nIndex = 0; nIndex < NNetwork.networkData.hiddenLayers.get(layerIndex).size();
+					nIndex++){
+				tempNeuron = NNetwork.networkData.hiddenLayers.get(layerIndex).get(nIndex);
+				trainNeuron(tempNeuron, layerIndex, expectedOutput );
+			}
+		}
+		
+		for(int nIndex = 0; nIndex < NNetwork.networkData.outputNeurons.size();
+				nIndex++){
+			tempNeuron = NNetwork.networkData.outputNeurons.get(nIndex);
+			trainNeuron(tempNeuron,  NNetwork.networkData.hiddenLayers.size() -1, expectedOutput);
+		}
+	}
+	
 }
 // To do:
 // Need to add initialization methods for initializing the momentum and the

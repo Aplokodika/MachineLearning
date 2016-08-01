@@ -54,6 +54,29 @@ public class NetworkData{
 		noOfNeurons = k;
 	}
 	
+	public void setCommonLearningRateMomentum(ArrayList<Integer> sizeList, Float lRate, Float momentum){
+		int endSize = sizeList.size() - 1;
+		for(int i = 0; i < sizeList.get(0); i++){
+			inputNeurons.get(i).learningRate = lRate;
+			inputNeurons.get(i).momentum = momentum;
+		}
+		
+		// for the hidden layers
+		for (int i = 0; i < endSize - 1; i++){
+			for(int j = 0; j < sizeList.get(i + 1); j++){ 
+				// i + 1 because, sizeList stores the size for the input layer,
+			// hidden layer and the output layer. Hence it must succeed by 1		
+				hiddenLayers.get(i).get(j).learningRate = lRate;
+				hiddenLayers.get(i).get(j).momentum = momentum;
+			}
+		}
+		
+		//for output neurons
+		for(int i = 0; i < sizeList.get(endSize); i++){
+			outputNeurons.get(i).learningRate = lRate;
+			outputNeurons.get(i).momentum = momentum;
+		}
+	}
 	
 	int  getNoOfNeurons(){
 		return noOfNeurons;
