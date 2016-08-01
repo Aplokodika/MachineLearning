@@ -23,3 +23,4 @@ The development process should proceed with, following defined guidelines of cod
 This process ensures that the new user follows the footsteps of the original developers to further understand the functionality of the code. Data abstraction is necessary, but at the same time, there should be a proper access to information on the middle and the low-level code present in the software. While extending the softwares functionality or while adapting a part of the code in other applications, the functionality of the code is required to be more clear. This can only be done when the developer logs the development process as this would then give a chance for the newer users to understand what are the more prominent mistakes a developer may make while developing a particular software. 
 
 Being familiar with the mistakes one can make while developing a program at times is more important than the right way to do it.
+(Test)
