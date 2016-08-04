@@ -10,8 +10,15 @@ import java.util.*;
 class ActFunction implements Activation {
 
 	@Override
-	public Float activation(Float inp) {
-		return inp.floatValue();
+	public Double activation(Double inp) {
+		return inp.doubleValue();
+		/*if(inp.doubleValue() > -100 && inp.doubleValue() < 100)
+			return inp;
+		else if(inp.doubleValue() < -100)
+			return (double) -100;
+		else 
+			return (double) 100;*/
+			
 	}
 
 }
@@ -19,10 +26,15 @@ class ActFunction implements Activation {
 class ActFunction2 implements Activation {
 
 	@Override
-	public Float activation(Float inp) {
-		return inp.floatValue();
+	public Double activation(Double inp) {
+		/*if(inp.doubleValue() > -100 && inp.doubleValue() < 100)
+			return inp;
+		else if(inp.doubleValue() < -100)
+			return (double) -100;
+		else 
+			return (double) 100;*/
+		return -inp.doubleValue();
 	}
-
 }
 
 class ErrorFunction implements ComputeError {
@@ -30,12 +42,16 @@ class ErrorFunction implements ComputeError {
 	
 
 	@Override
-	public Float computeError(ArrayList<Float> expectedOut, ArrayList<Float> obtainedOut) {
-		float result = new Float(0);
+	public Double computeError(ArrayList<Double> expectedOut, ArrayList<Double> obtainedOut){
+ 		Double result = new Double((double)0);
+ 		
+ 		Double  val;
 		for (int i = 0; i < expectedOut.size(); i++) {
-			result += (expectedOut.get(i).floatValue() - obtainedOut.get(i).floatValue())*
-					(expectedOut.get(i).floatValue() - obtainedOut.get(i).floatValue());
+			val = expectedOut.get(i).doubleValue() - obtainedOut.get(i).doubleValue();
+			result = result.doubleValue() + val.doubleValue()*val.doubleValue();
+			
 		}
+		
 		return result;
 	}
 
@@ -47,10 +63,10 @@ public class MainFnc {
 		ArrayList<Integer> sizeList = new ArrayList<Integer>();
 
 		sizeList.add(2);
-		sizeList.add(3);
-		sizeList.add(4);
+		sizeList.add(10);
+		//sizeList.add(5);
 		sizeList.add(2);
-		sizeList.add(1);
+		//sizeList.add(1);
 		sizeList.add(2);
 		int noOfWeightValues = ConstructNetwork.weightPairSize(sizeList);
 		int noOfNeurons = ConstructNetwork.noOfNeurons(sizeList);
@@ -65,18 +81,20 @@ public class MainFnc {
 		ConstructNetwork neuralNet;
 
 		neuralNet = new ConstructNetwork(inp, new ErrorFunction(), sizeList);
-		ArrayList<Float> weightValues = new ArrayList<Float>();
+		ArrayList<Double> weightValues = new ArrayList<Double>();
 		WeightPair pair = new WeightPair();
 
 		for (int i = 0; i < noOfWeightValues; i++) {
-			weightValues.add((float) .001);
+			weightValues.add((double) 0);
 		}
 		pair.weight = weightValues;
 
 		neuralNet.constructNetworkLayered(sizeList, pair);
-		ArrayList<Float> inputs = new ArrayList<Float>();
+		ArrayList<Double> inputs = new ArrayList<Double>();
+		
+		
 		for (int i = 0; i < neuralNet.NNetwork.networkData.inputNeurons.size(); i++) {
-			inputs.add((float) 0.0001);
+			inputs.add((double)5);
 		}
 		neuralNet.NNetwork.networkData.setInput(inputs);
 		neuralNet.NNetwork.computeNetworkResult(0, NeuralNetwork.MoveOrder.moveForward);
@@ -84,20 +102,106 @@ public class MainFnc {
 		
 		NeuralTrainer neuralTrainer = new NeuralTrainer();
 		
-		ArrayList<Float> expectedOutput = new ArrayList<Float>();
-		expectedOutput.add((float).009);
-		expectedOutput.add((float).008);
+		ArrayList<Double> expectedOutput = new ArrayList<Double>();
+		expectedOutput.add((double)10);
+		expectedOutput.add((double)20);
 		neuralTrainer.setNNetwork(neuralNet.NNetwork);
-		neuralTrainer.NNetwork.networkData.setCommonLearningRateMomentum(sizeList, (float).0002, (float).9);
-		for(int i = 0; i < 100; i++)
-		neuralTrainer.trainNetwork(expectedOutput);
+		neuralTrainer.NNetwork.
+		networkData.setCommonLearningRateMomentum(sizeList, (double).05, (double)0.9);
 		
+		for(int i = 0; i <1000; i++) {
+			for (int j = 0; j < neuralNet.NNetwork.networkData.inputNeurons.size(); j++) {
+				inputs.set(j, (double) i);
+			}
+			neuralNet.NNetwork.networkData.setInput(inputs);
+			expectedOutput.set(0,(double) i);
+			expectedOutput.set(1,(double) i + 1);
+			neuralTrainer.trainNetwork(expectedOutput);
+			/*for(int j = 0; j < neuralNet.NNetwork.networkData.inputNeurons.size(); j++) {
+				inputs.set(j, (double) 1);
+			}
+		
+			neuralNet.NNetwork.networkData.setInput(inputs);
+			expectedOutput.set(0,(double) 600);
+			expectedOutput.set(1,(double) 600);
+			neuralTrainer.trainNetwork(expectedOutput);*/
+		}
+		
+		/*for(int i = 0; i <1000; i++) {
+			for (int j = 0; j < neuralNet.NNetwork.networkData.inputNeurons.size(); j++) {
+				inputs.set(j, (double) 5);
+			}
+			neuralNet.NNetwork.networkData.setInput(inputs);
+			expectedOutput.set(0,(double) 10);
+			expectedOutput.set(1,(double) 20);
+			neuralTrainer.trainNetwork(expectedOutput);
+			
+		}
+		
+		for(int i = 0; i <1000; i++) {
+			for(int j = 0; j < neuralNet.NNetwork.networkData.inputNeurons.size(); j++) {
+				inputs.set(j, (double) 1);
+			}
+			
+		
+			neuralNet.NNetwork.networkData.setInput(inputs);
+			expectedOutput.set(0,(double) 600);
+			expectedOutput.set(1,(double) 600);
+			neuralTrainer.trainNetwork(expectedOutput);
+		}*/
+		
+		
+		/*for (int j = 0; j < neuralNet.NNetwork.networkData.inputNeurons.size(); j++) {
+			inputs.set(j, (double) 5);
+		}
+		neuralNet.NNetwork.networkData.setInput(inputs);
+
+		neuralNet.NNetwork.computeNetworkResult(0, NeuralNetwork.MoveOrder.moveForward);
+
 		for (int i = 0; i < neuralNet.NNetwork.networkData.outputNeurons.size(); i++) {
 			System.out.println(neuralNet.NNetwork.networkData.outputNeurons.get(i).outputResult);
-		}
+		}*/
+		
+		for(int k = 0; k < 1000; k++) {
 
+			for (int j = 0; j < neuralNet.NNetwork.networkData.inputNeurons.size(); j++) {
+				inputs.set(j, (double) k);
+			}
+			neuralNet.NNetwork.networkData.setInput(inputs);
+
+			neuralNet.NNetwork.computeNetworkResult(0, NeuralNetwork.MoveOrder.moveForward);
+
+			for (int i = 0; i < neuralNet.NNetwork.networkData.outputNeurons.size(); i++) {
+				System.out.println("in :" + k + "Out :" + neuralNet.NNetwork.networkData.outputNeurons.get(i).outputResult);
+			}
+		}
+		System.out.println("******************************* Weight Values ***************************");
+		
+		for(int i = 0; i < neuralNet.NNetwork.networkData.inputNeurons.size(); i++){
+			for(Map.Entry entry :
+				neuralNet.NNetwork.networkData.inputNeurons.get(i).weightValues.entrySet()){
+				System.out.println(entry.getValue());
+			}
+		}
+		
+		for(int i = 0; i < neuralNet.NNetwork.networkData.hiddenLayers.size(); i++){
+			for(int j = 0; j < neuralNet.NNetwork.networkData.hiddenLayers.get(i).size(); j++){
+				for(Map.Entry entry :
+					neuralNet.NNetwork.networkData.hiddenLayers.get(i).get(j).weightValues.entrySet()){
+					System.out.println(entry.getValue());
+				}
+			}
+		}
+		
+		for(int i = 0; i < neuralNet.NNetwork.networkData.outputNeurons.size(); i++){
+			for(Map.Entry entry :
+					neuralNet.NNetwork.networkData.outputNeurons.get(i).weightValues.entrySet()){
+				System.out.println(entry.getValue());
+			}
+		}
+		
+		
 		System.out.println("Done");
 		
 	}
-
 }
