@@ -7,12 +7,12 @@ package neuralNetwork;
 import java.util.ArrayList;
 
 public class WeightPair{
-	public ArrayList<Float> weight;
+	public ArrayList<Double> weight;
 	public int index;
 	public WeightPair(){
 		index = 0;
 	}
-	WeightPair(ArrayList<Float> w){
+	WeightPair(ArrayList<Double> w){
 		weight  = w;
 	}
 }

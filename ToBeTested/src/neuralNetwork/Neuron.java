@@ -21,8 +21,9 @@ import java.util.*;
 */
 public class Neuron {
 	
+	
 	public Neuron(){
-		this.neuronIndex = newNeuronIndex();
+		this.setNeuronIndex(newNeuronIndex());
 	}
 	public static void reset(Integer setVal){
 		curUnusedIndex = new Integer(setVal.intValue());
@@ -45,54 +46,67 @@ public class Neuron {
 	// holds the next unused Index for the neurons. Each time it is used, 
 	// the index increments. This ensures that each neurons will get a unique 
 	// index value. 
-	public static Integer curUnusedIndex;
-		
+	private static Integer curUnusedIndex = new Integer(0);
+	
+	public static Integer getCurUnusedIndex(){
+		return curUnusedIndex; 
+	}
+	
+	
 	// the index of the current layer. 
-	public Integer neuronIndex;
+	private Integer neuronIndex;
+	
+	private void setNeuronIndex(Integer neuronIndex) {
+		this.neuronIndex = neuronIndex;
+	}
+	
+	public Integer getNeuronIndex() {
+		return neuronIndex;
+	}
 	
 	
 	// The activation function of the neuron.
-	public Activation activation;
+	private Activation activation;
 	
-	void setActivationFnc(Activation act){
-		activation = act;
+	private Activation getActivation() {
+		return activation;
 	}
+	
+	
+	public void setActivation(Activation activation) {
+		this.activation = activation;
+	}
+	
+	
 
 	// Neuron's input: This is the summation of output from each of the
 	// previous layer neuron's output times the corresponding connecting
 	// weight values.
-	public Float input;
+	public Double input;
 
 	// stores the output of the activation function.
-	public Float outputResult;
+	public Double outputResult;
 
 	// This collectively stores the parent neurons, to enable back-tracking. 
 	public ArrayList<Neuron> parentNeurons = new ArrayList<Neuron>();
 	
 	// The weight values of the forward neurons
-	private Map<Integer, Float> weightValues = new HashMap<Integer, Float>();
+	public Map<Integer, Double> weightValues = new HashMap<Integer, Double>();
 	
-	public Float getWeight(Integer index){
+	public Double getWeight(Integer index){
 		return weightValues.get(index);
 	}
 	
-	/**
-	 * The previous weight values
-	 * 
-	 * */
+	public Map<Integer, Double> previousChangeValues = new HashMap<Integer, Double>();
 	
-	private Map<Integer, Float> preWeightValues = new HashMap<Integer, Float>();
-
-	public  Float getPreWeight(Integer index) {
-		return preWeightValues.get(index);
-	}
+	public Map<Integer, Double> previousError = new HashMap<Integer, Double>();
 	
-	// Link to the next neurons (forward).
+	
 	public ArrayList<Neuron> childNeurons = new ArrayList<Neuron>();
 
 	
-	public Float learningRate;
-	public Float momentum;
+	public Double learningRate;
+	public Double momentum;
 	
 	
 	
@@ -102,12 +116,7 @@ public class Neuron {
 	 * causes the weight modification
 	 * to be reversed
 	*/
-	private Float previousWeight;
-	private Integer previousIndex;
-	
-	private Float prePreviousWeight;
-	private Integer prePreviousIndex;
-	
+
 	public Neuron generateNewNeuron(){
 		return new Neuron();
 	}
@@ -123,41 +132,20 @@ public class Neuron {
 	 * @change - the change to be incorporated (can either be negative or 
 	 * 			 positive).  
 	 * */
-	public void updateWeight(Integer index, Float change) {
-		previousWeight = weightValues.get(index.intValue());
-		previousIndex = index;
-				
-		if(preWeightValues.get(index) != null){
-			prePreviousWeight = preWeightValues.get(index);
-			prePreviousIndex = index;
-			preWeightValues.put(index, weightValues.get(index));
-
-		}
+	public void updateWeight(Integer index, Double change) {
 		
 		weightValues.put(index, 
-							previousWeight.floatValue() + change.floatValue());
+				weightValues.get(index.intValue()) + change.doubleValue());
 
 	}
-
-	/** reverseUpdate
-	 * =============
-	 * This method reverses the modification previously done on the weight
-	 * values.
-	*/
-	public void reverseUpdate() {
-
-		if (previousWeight == null)
-			return;
-		weightValues.put(previousIndex, previousWeight.floatValue());
-		if(prePreviousWeight != null){
-			preWeightValues.put(prePreviousIndex, prePreviousWeight);
-		}
-		previousWeight = null;
-		previousIndex = null;
-		prePreviousWeight = null;
-		prePreviousIndex = null;
-
+	
+	public boolean checkFeasibility(Integer index, Double change){
+		
+		if(Double.isInfinite(change))
+			return false;
+		return true;
 	}
+	
 
 	/**
 	 * This connects another neuron to the current neuron. the current 
@@ -173,9 +161,8 @@ public class Neuron {
 	 * 			  address in the layer they are present. This purpose is served
 	 * 		      by index.     
 	 */
-	public void connectWith(Neuron neuron, Float weight){
-		preWeightValues.put(neuron.neuronIndex, weight);
-		weightValues.put(neuron.neuronIndex, weight);
+	public void connectWith(Neuron neuron, Double weight){
+		weightValues.put(neuron.getNeuronIndex(), weight);
 		childNeurons.add(neuron); 
 		neuron.parentNeurons.add(this);
 	}
@@ -209,8 +196,7 @@ public class Neuron {
 	
 	public void disconnectWith(Neuron neuron) throws Exception{
 		int i, j;
-		preWeightValues.remove(neuron.neuronIndex);
-		weightValues.remove(neuron.neuronIndex);
+		weightValues.remove(neuron.getNeuronIndex());
 	 
 		
 		i = findChildIndex(neuron);
@@ -229,28 +215,26 @@ public class Neuron {
 	 *  previous layer connecting to the current neuron and stored in the variable `input`.  
 	 */
 	public void pullInput(){
-		input = new Float(0);
+		input = new Double(0);
 		if (parentNeurons == null) return; // the case when these are input neurons
 		
 		for(int i = 0; i < parentNeurons.size(); i++){
 			
-			input = new Float(
-					input.floatValue() + 
-					(parentNeurons.get(i).weightValues.get(this.neuronIndex.intValue()).floatValue()*
-					 parentNeurons.get(i).outputResult.floatValue())
+			input = new Double(
+					input.doubleValue() + 
+					(parentNeurons.get(i).weightValues.get(this.getNeuronIndex().intValue()).doubleValue()*
+					 parentNeurons.get(i).outputResult.doubleValue())
 					);
 		}
 	}
+	
 	/**
 	 * This calls the activation function and stores the result in the variable, 
 	 * `outputResult`.
 	 */
 	public void computeOutput(){
-		outputResult = activation.activation(input);
-	}
-	
-
-		
+		outputResult = getActivation().activation(input);
+	}		
 		
 }
 

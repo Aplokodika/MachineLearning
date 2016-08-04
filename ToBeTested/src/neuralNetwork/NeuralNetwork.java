@@ -16,9 +16,6 @@ public class NeuralNetwork {
 
 	public NetworkData networkData;
 
-	// public Float learningRate;
-
-	// public Float momentum;
 
 	ComputeError errorFunction;
 
@@ -83,11 +80,11 @@ public class NeuralNetwork {
 	}
 
 	/*
-	 * public void trainDataSet(ArrayList<Float>inputValues, ArrayList<Float>
+	 * public void trainDataSet(ArrayList<Double>inputValues, ArrayList<Double>
 	 * expectedOutput) throws Exception{
 	 * 
 	 * networkData.setInput(inputValues); computeNetworkResult();
-	 * ArrayList<Float> outputs =
+	 * ArrayList<Double> outputs =
 	 * NLayerToArray.obtainLayerOutputInArray(networkData.outputNeurons);
 	 * 
 	 * }

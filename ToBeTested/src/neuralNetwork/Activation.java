@@ -5,5 +5,5 @@
 package neuralNetwork;
 
 public interface Activation {
-	Float activation(Float inp);
+	Double activation(Double inp);
 }
