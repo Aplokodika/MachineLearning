@@ -68,50 +68,36 @@ public class NeuralTrainer {
 	public void trainNeuron(Neuron neuron, ArrayList<Double> expectedOutput) throws Exception {
 		Neuron preNeuron;
 		NNetwork.computeNetworkResult(0, MoveOrder.moveForward);
-		
-		ArrayList<Double> annOutput
-					= NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
-		
+
+		ArrayList<Double> annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
+
 		Double neuronError = NNetwork.errorFunction.computeError(expectedOutput, annOutput);
-		
-		
+
 		Double changeErrorAdd = new Double(Double.MAX_VALUE);
 		Double changeErrorSub = changeErrorAdd;
 		Double change;
 
 		for (int i = 0; i < neuron.parentNeurons.size(); i++) {
 			preNeuron = neuron.parentNeurons.get(i);
-			if ( (preNeuron.previousChangeValues.get(neuron.getNeuronIndex()) != null) &&
-				 (preNeuron.previousError.get(neuron.getNeuronIndex()) != null)) {
-				change = positiveValue(
-						(
-								neuron.learningRate.doubleValue() 
-								*positiveValue ( neuronError.doubleValue() 
-										       - preNeuron.previousError.get(neuron.getNeuronIndex()))
-						 )		
-						+ (
-								neuron.momentum.doubleValue() 
-								* (
-										preNeuron.previousChangeValues.get(neuron.getNeuronIndex())
-								   )
-						  )
-						);
-				
-			} else if (preNeuron.previousError.get(neuron.getNeuronIndex()) != null){
+			if ((preNeuron.previousChangeValues.get(neuron.getNeuronIndex()) != null)
+					&& (preNeuron.previousError.get(neuron.getNeuronIndex()) != null)) {
+				change = positiveValue((neuron.learningRate.doubleValue() * positiveValue(
+						neuronError.doubleValue() - preNeuron.previousError.get(neuron.getNeuronIndex())))
+						+ (neuron.momentum.doubleValue()
+								* (preNeuron.previousChangeValues.get(neuron.getNeuronIndex()))));
+
+			} else if (preNeuron.previousError.get(neuron.getNeuronIndex()) != null) {
 				preNeuron = neuron.parentNeurons.get(i);
-				change = positiveValue(neuron.learningRate.doubleValue() 
-						* positiveValue ( neuronError.doubleValue() 
-					       - preNeuron.previousError.get(neuron.getNeuronIndex()))
-						);
-					}
-				else {
-					change = neuron.learningRate.doubleValue();
-				}
+				change = positiveValue(neuron.learningRate.doubleValue() * positiveValue(
+						neuronError.doubleValue() - preNeuron.previousError.get(neuron.getNeuronIndex())));
+			} else {
+				change = neuron.learningRate.doubleValue();
+			}
 			if (preNeuron.checkFeasibility(neuron.getNeuronIndex(), change)) {
 				preNeuron.updateWeight(neuron.getNeuronIndex(), change);
 				NNetwork.computeNetworkResult(0, MoveOrder.moveForward);// finds
-																					// the
-																					// result
+																		// the
+																		// result
 				annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
 				changeErrorAdd = NNetwork.errorFunction.computeError(expectedOutput, annOutput);
 				preNeuron.updateWeight(neuron.getNeuronIndex(), -change.doubleValue());
@@ -120,8 +106,8 @@ public class NeuralTrainer {
 			if (preNeuron.checkFeasibility(neuron.getNeuronIndex(), -change.doubleValue())) {
 				preNeuron.updateWeight(neuron.getNeuronIndex(), -change.doubleValue());
 				NNetwork.computeNetworkResult(0, MoveOrder.moveForward);// finds
-																					// the
-																					// result
+																		// the
+																		// result
 				annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
 				changeErrorSub = NNetwork.errorFunction.computeError(expectedOutput, annOutput);
 
@@ -130,18 +116,18 @@ public class NeuralTrainer {
 
 			ChangeWeight changeWeight = checkChange(changeErrorAdd, changeErrorSub, neuronError);
 			if (changeWeight.equals(ChangeWeight.increaseWeight)) {
-				//System.out.println("err ::: " + changeErrorAdd);
+				// System.out.println("err ::: " + changeErrorAdd);
 				preNeuron.previousChangeValues.put(neuron.getNeuronIndex(), change);
 				preNeuron.previousError.put(neuron.getNeuronIndex(), neuronError);
 				preNeuron.updateWeight(neuron.getNeuronIndex(), change);
-			
+
 			} else if (changeWeight.equals(ChangeWeight.decreaseWeight)) {
-				//System.out.println("err ::: " + changeErrorSub);
-				preNeuron.previousChangeValues.put(neuron.getNeuronIndex(), - change.doubleValue());
+				// System.out.println("err ::: " + changeErrorSub);
+				preNeuron.previousChangeValues.put(neuron.getNeuronIndex(), -change.doubleValue());
 				preNeuron.previousError.put(neuron.getNeuronIndex(), neuronError);
 				preNeuron.updateWeight(neuron.getNeuronIndex(), -change.doubleValue());
 			}
-			
+
 			// else ignore
 		}
 	}
@@ -158,17 +144,41 @@ public class NeuralTrainer {
 	public void trainNetwork(ArrayList<Double> expectedOutput) throws Exception {
 		Neuron tempNeuron;
 		for (int layerIndex = 0; layerIndex < NNetwork.networkData.hiddenLayers.size(); layerIndex++) {
-			for (int nIndex = 0;
-					nIndex < NNetwork.networkData.hiddenLayers.get(layerIndex).size(); nIndex++) {
+			for (int nIndex = 0; nIndex < NNetwork.networkData.hiddenLayers.get(layerIndex).size(); nIndex++) {
 				tempNeuron = NNetwork.networkData.hiddenLayers.get(layerIndex).get(nIndex);
 				trainNeuron(tempNeuron, expectedOutput);
 			}
 		}
 
-		for (int nIndex = 0;
-				nIndex < NNetwork.networkData.outputNeurons.size(); nIndex++) {
+		for (int nIndex = 0; nIndex < NNetwork.networkData.outputNeurons.size(); nIndex++) {
 			tempNeuron = NNetwork.networkData.outputNeurons.get(nIndex);
 			trainNeuron(tempNeuron, expectedOutput);
+		}
+	}
+
+	private void trainRecursive(ArrayList<Double> expectedOutput, Neuron curNeuron,
+			Integer curLayer, Integer maxLayer) throws Exception {
+		trainNeuron(curNeuron, expectedOutput);
+		if (curLayer != (maxLayer - 1)) {
+			for (int i = 0; i < curNeuron.childNeurons.size(); i++) {
+				trainRecursive(expectedOutput, curNeuron.childNeurons.get(i), curLayer.intValue() + 1, maxLayer);
+
+			}
+
+		} else {
+			Neuron tempNeuron;
+			for (int nIndex = 0; nIndex < NNetwork.networkData.outputNeurons.size(); nIndex++) {
+				tempNeuron = NNetwork.networkData.outputNeurons.get(nIndex);
+				trainNeuron(tempNeuron, expectedOutput);
+			}
+		}
+
+	}
+
+	public void trainNetworkDepth(ArrayList<Double> expectedOutput) throws Exception {
+		for (int index = 0; index < NNetwork.networkData.hiddenLayers.get(0).size(); index++) {
+			trainRecursive(expectedOutput, NNetwork.networkData.hiddenLayers.get(0).get(index), 
+							0, NNetwork.networkData.hiddenLayers.size());
 		}
 	}
 
