@@ -19,6 +19,14 @@ public class NetworkData{
 		
 	public ArrayList <ArrayList<Neuron>> hiddenLayers = new ArrayList <ArrayList<Neuron>>();
 	
+	private ArrayList <ArrayList<Neuron>> netLayers = new ArrayList<ArrayList<Neuron>>();
+	public ArrayList<Neuron> getLayer(int layer){
+		return netLayers.get(layer);
+	}
+	public Neuron getNeuron(int layer, int neuronNo){
+		return netLayers.get(layer).get(neuronNo);
+	}
+	
 	public NetworkData(){
 		
 	}
@@ -28,28 +36,34 @@ public class NetworkData{
 		int endSize = sizeList.size() - 1;
 		Neuron temp;
 		int k = 0;
+		netLayers.add(0, new ArrayList<Neuron>());
 		// for input neurons
 		for(int i = 0; i < sizeList.get(0); i++, k++){
 			temp = new Neuron();
 			temp.setActivation(act.get(k));
 			inputNeurons.add(temp);
+			netLayers.get(0).add(temp);
 		}
 		
 		// for the hidden layers
 		for (int i = 0; i < endSize - 1; i++){
 			hiddenLayers.add(i, new ArrayList<Neuron>());
+			netLayers.add(i + 1,new ArrayList<Neuron>() );
 			for(int j = 0; j < sizeList.get(i + 1); j++, k++){ // i + 1 because, sizeList stores the size for the input layer,
 				temp = new Neuron();						   // hidden layer and the output layer. Hence it must succeed by 1
 				temp.setActivation(act.get(k));
 				hiddenLayers.get(i).add(temp);
+				netLayers.get(i+1).add(temp);
 			}
 		}
 		
 		//for output neurons
+		netLayers.add(endSize,new ArrayList<Neuron>() );
 		for(int i = 0; i < sizeList.get(endSize); i++, k++){
 			temp = new Neuron();
 			temp.setActivation(act.get(k));
 			outputNeurons.add(temp);
+			netLayers.get(endSize).add(temp);
 		}
 		noOfNeurons = k;
 	}
