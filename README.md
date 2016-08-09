@@ -1,4 +1,12 @@
-#Project files:
+## Third party contributors are welcomed!!! 
+
+We encourage and accept any kind of external contribution because our project is in currently in its early stages of development. We are looking forward to learning and sharing ideas with developers like you, so that we may together grow our skills and knowledge in this area. If you are really interested in machine learning, and if you want to team up with someone to learn and gain experience collaboratively, you are in the right place! 
+
+**Major contributors:**  
+
+1.	Sreram K (sreramk@outlook.com) 
+2.	(could be your name here  )
+#Project files
 
 
 1.	[Test Files](https://github.com/Aplokodika/MachineLearning/tree/master/ToBeTested/src/mainFnc)
