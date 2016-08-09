@@ -1,5 +1,10 @@
-[Test Files](https://github.com/Aplokodika/MachineLearning/tree/master/ToBeTested/src/mainFnc)
+#Project files:
 
+
+1.	[Test Files](https://github.com/Aplokodika/MachineLearning/tree/master/ToBeTested/src/mainFnc)
+2.	[The Neural Network library](https://github.com/Aplokodika/MachineLearning/tree/master/ToBeTested/src/neuralNetwork)
+
+The test methods present in the file [Test Files](https://github.com/Aplokodika/MachineLearning/tree/master/ToBeTested/src/mainFnc) are to be renamed to MainFnc.java before testing. There are two packages in this project, as of now. `neuralNetwork` and `mainFnc`. The entire library of standard neural networks functionality will be built-into the same package. Other extensions and beyond the first milestone must be created in newer packages. 
 
 # MachineLearning
 
