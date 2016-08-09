@@ -5,7 +5,7 @@ We encourage and accept any kind of external contribution because our project is
 **Major contributors:**  
 
 1.	Sreram K (sreramk@outlook.com) 
-2.	(could be your name here  )
+2.	(could be your name here )
 #Project files
 
 
