@@ -27,6 +27,14 @@ public class NetworkData{
 		return netLayers.get(layer).get(neuronNo);
 	}
 	
+	public int getNoOfLayers()  {
+		return netLayers.size();
+	}
+	
+	public int getNoOfNeuronsInLayer(int layer){
+		return netLayers.get(layer).size();
+	}
+	
 	public NetworkData(){
 		
 	}

@@ -17,7 +17,19 @@ public class ConstructNetwork  {
 	}
 	
 	public NeuralNetwork NNetwork; 
-	
+	/**
+	 * This method forms links between the layers, layer1 and layer2, connecting 
+	 * each of the neurons in layer1 with each neurons in layer2 assigning the 
+	 * weight values from the variables wPair. the variable wPair.index is a temporary
+	 * variable (initialized as zero), which keeps record of the the number of weight 
+	 * values assigned used in forming the weighed connection.  
+	 * 
+	 * @param layer1 - the backward layer
+	 * @param layer2 - the forward layer
+	 * @param wPair - contains the weight values
+	 * @throws Exception - this exception gets thrown if there aren't enough weight 
+	 * 					   values in wPair
+	 */
 	public static void formWeightLinks(ArrayList<Neuron> layer1, ArrayList<Neuron> layer2,
 			WeightPair wPair)throws Exception{
 		
@@ -33,7 +45,11 @@ public class ConstructNetwork  {
 			}
 		}
 	}
-	
+	/**
+	 * Used for initializing WeightPair variables
+	 * @param sizeList this shows the number of neurons in each layer 
+	 * @return The number of weight values required for initializing the system.  
+	 */
 	public static int weightPairSize(ArrayList<Integer> sizeList){
 		int result = 0;
 		for(int i = 0; i < sizeList.size() - 1; i++){
@@ -41,7 +57,14 @@ public class ConstructNetwork  {
 		}
 		return result;
 	}
-	
+	/**
+	 * This method constructs the neural network by forming the required links. 
+	 * 
+	 * @param size - (Or sizeList) is the list of number of neurons in each layer. 
+	 * @param wPair - the list of all the weight values to be initialized while 
+	 * 					initialization
+	 * @throws Exception throws exception from formWeightLinks
+	 */
 	public void constructNetworkLayered(ArrayList<Integer> size, WeightPair wPair) throws Exception{
 		wPair.index = 0; 
 		int maxHidden = NNetwork.networkData.hiddenLayers.size();
@@ -63,7 +86,11 @@ public class ConstructNetwork  {
 		
 		NNetwork.constructStatus = true;
 	}
-	
+	/**
+	 * computes the number of neurons in the system. 
+	 * @param layerSize list of number of neurons in each layer
+	 * @return returns the summation of the list layerSize
+	 */
 	public static int noOfNeurons(ArrayList<Integer> layerSize){
 		int result = 0;
 		for(int i = 0; i < layerSize.size(); i++)

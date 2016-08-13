@@ -96,7 +96,8 @@ public class NeuralNetwork {
 				if (direction == MoveOrder.moveForward) {
 					neuronTemp = neuron.childNeurons.get(i);// this is a map!!!! not an ArrayList!!!
 				} else {
-					neuronTemp = neuron.parentNeurons.get(i);
+					neuronTemp = neuron.parentNeurons.get(i); // !! this is bound to cause errors in 	
+															 // the new update. 
 				}
 				if (neuronTemp != null) {
 					neuronTemp.pullInput();
