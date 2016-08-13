@@ -96,9 +96,7 @@ public class NeuralTrainer {
 			}
 			if (preNeuron.checkFeasibility(neuron.getNeuronIndex(), change)) {
 				preNeuron.updateWeight(neuron.getNeuronIndex(), change);
-				NNetwork.computeNetworkResult(0, MoveOrder.moveForward);// finds
-																		// the
-																		// result
+				NNetwork.computeNetworkResult(0, MoveOrder.moveForward);// finds the result
 				annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
 				changeErrorAdd = NNetwork.errorFunction.computeError(expectedOutput, annOutput);
 				preNeuron.updateWeight(neuron.getNeuronIndex(), -change.doubleValue());
@@ -106,9 +104,7 @@ public class NeuralTrainer {
 
 			if (preNeuron.checkFeasibility(neuron.getNeuronIndex(), -change.doubleValue())) {
 				preNeuron.updateWeight(neuron.getNeuronIndex(), -change.doubleValue());
-				NNetwork.computeNetworkResult(0, MoveOrder.moveForward);// finds
-																		// the
-																		// result
+				NNetwork.computeNetworkResult(0, MoveOrder.moveForward);// finds the result
 				annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
 				changeErrorSub = NNetwork.errorFunction.computeError(expectedOutput, annOutput);
 
