@@ -67,7 +67,7 @@ public class NeuralNetworkInterface {
 	private Integer abstLayerOutputs = null;
 	
 	
-	private TrainingDataSet dataSet;
+	private TrainingDataSet dataSet = new TrainingDataSet();
 	private boolean isDataSetSet = false;
 	
 	private ArrayList<Integer> sizeList = new ArrayList<Integer>();
@@ -100,6 +100,26 @@ public class NeuralNetworkInterface {
 	private boolean areBiasWeightValuesSet = false;
 	
 	
+	
+	public boolean  setLearningRateMomentum(Double lRate, Double momentum) throws Exception{
+		commonLearningRate = lRate;
+		commonMomentum = momentum;
+		return initializeSystem();
+	}
+	
+	public boolean  setActivationFunction(Activation hiddenFnc, Activation outputFnc) throws Exception{
+		
+		if(isSizeListSet == false)	{
+			Exception e = new Exception("Error: must initialize sizeList first ");
+			throw e;
+		}
+		for(int i = 0; i < noOfNeurons - sizeList.get(sizeList.size()-1); i++)
+			activationFunctions.add(hiddenFnc);
+		for(int i = 0; i < sizeList.get(sizeList.size()-1); i++)
+			activationFunctions.add(outputFnc);
+		isActivationFunctionSet = true;
+		return initializeSystem();
+	}
 	
 	/**
 	 * From here, the initialization region begins. 
@@ -356,6 +376,21 @@ public class NeuralNetworkInterface {
 				isDataSetSet &&
 				areBiasValuesInitializedIntoNetwork);
 		return isSystemReady;
+	}
+	
+	public ArrayList<String> getUnInitializedValues(){
+		ArrayList<String> result = new ArrayList<String>();
+		if(areLearningRateMomentumSet == false)		result.add("areLearningRateMomentumSet");
+		if(isNetworkAssignedToNeuralTrainer == false)	result.add("isNetworkAssignedToNeuralTrainer");
+		if(areWeightValuesInitializedIntoNetwork == false)	result.add("areWeightValuesInitializedIntoNetwork");
+		if(isNetworkConstructed == false)	result.add("isNetworkConstructed");
+		if(isNumberOfWeightsNeuronsSet == false)	result.add("isNumberOfWeightsNeuronsSet");
+		if(isDataSetSet == false)	result.add("isDataSetSet");
+		if(areBiasValuesInitializedIntoNetwork == false) result.add("areBiasValuesInitializedIntoNetwork");
+		
+		if(result.size() == 0)
+			return null;
+		else return result;
 	}
 	
 	/**
