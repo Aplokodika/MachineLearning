@@ -22,6 +22,18 @@ import java.util.*;
 public class Neuron {
 	
 	
+	/*public static enum NeuronCallSession {
+		SESSION_1, SESSION_2
+	}
+	
+	public static NeuronCallSession reverseSession(NeuronCallSession session){
+		return (session == NeuronCallSession.SESSION_1)?
+				NeuronCallSession.SESSION_2: NeuronCallSession.SESSION_1; 
+	}
+	
+	public NeuronCallSession callSession =NeuronCallSession.SESSION_1 ;
+	*/
+	
 	public Neuron(){
 		this.setNeuronIndex(newNeuronIndex());
 	}

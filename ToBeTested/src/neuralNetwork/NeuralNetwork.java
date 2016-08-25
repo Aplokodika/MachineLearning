@@ -8,9 +8,6 @@ import java.util.*;
 
 public class NeuralNetwork {
 
-	public static enum MoveOrder {
-		moveForward, moveBackward
-	};
 
 	public boolean constructStatus = false;
 
@@ -53,6 +50,14 @@ public class NeuralNetwork {
 		errorFunction = errFnc;
 	}
 
+	
+	//private Neuron.NeuronCallSession currentSession = Neuron.NeuronCallSession.SESSION_1;
+	
+	/*public void resetSission(){
+		currentSession = Neuron.NeuronCallSession.SESSION_1;
+		networkData.resetFlagsNetLayers();
+	}*/
+	
 	/**
 	 * This computes the final output value based on the inputs from the
 	 * previous neurons, iterating through each layers. This method is called
@@ -60,7 +65,12 @@ public class NeuralNetwork {
 	 * 
 	 * @throws Exception
 	 */
-	public void computeNetworkResult(int startIndex, MoveOrder direction) throws Exception {
+	public void computeNetworkResult(int startIndex) throws Exception {
+		
+		Map<Integer, Boolean> sessionHash = new HashMap<Integer, Boolean>();
+		
+		//Neuron.NeuronCallSession session = Neuron.reverseSession(currentSession);
+		
 		if (constructStatus == false) {
 			Exception e = new Exception("error : Network not constructed");
 			throw e;
@@ -91,21 +101,20 @@ public class NeuralNetwork {
 		while (neuronQueue.isEmpty() == false) {
 			Neuron neuronTemp;
 			Neuron neuron = neuronQueue.poll();
-			for (int i = 0; i < ((direction == MoveOrder.moveForward) ? neuron.childNeurons.size()
-					: neuron.parentNeurons.size()); i++) {
-				if (direction == MoveOrder.moveForward) {
-					neuronTemp = neuron.childNeurons.get(i);// this is a map!!!! not an ArrayList!!!
-				} else {
-					neuronTemp = neuron.parentNeurons.get(i); // !! this is bound to cause errors in 	
-															 // the new update. 
-				}
-				if (neuronTemp != null) {
+			for (int i = 0; i < neuron.childNeurons.size(); i++) {
+				
+				neuronTemp = neuron.childNeurons.get(i);
+				
+				if (neuronTemp != null && sessionHash.get(neuronTemp.getNeuronIndex()) == null ) {
 					neuronTemp.pullInput();
 					neuronTemp.computeOutput();
 					neuronQueue.add(neuronTemp);
+					//neuronTemp.callSession = session;
+					sessionHash.put(neuronTemp.getNeuronIndex(), true);
 				}
 			}
 		}
+		//currentSession = session;
 
 	}
 

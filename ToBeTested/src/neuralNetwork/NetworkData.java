@@ -7,6 +7,7 @@ package neuralNetwork;
 
 import java.util.ArrayList;
 
+
 public class NetworkData{
 
 	public boolean initializedInputs = false;
@@ -39,6 +40,14 @@ public class NetworkData{
 		
 	}
 	
+	
+	/*public void resetFlagsNetLayers(){
+		for(int i = 0; i < netLayers.size(); i++){
+			for(int j = 0; j < netLayers.get(i).size(); j++){
+				netLayers.get(i).get(j).callSession = NeuronCallSession.SESSION_1;
+			}
+		}
+	}*/
 	
 	public void initializeNeurons(ArrayList<Integer> sizeList, ArrayList<Activation> act){
 		int endSize = sizeList.size() - 1;

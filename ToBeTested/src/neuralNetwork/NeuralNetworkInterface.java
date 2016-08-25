@@ -9,13 +9,28 @@ import java.util.ArrayList;
 
 
 class TrainingDataSet{
-	public ArrayList<ArrayList<Double>> dataSetInputs = new ArrayList<ArrayList<Double>>();
-	public ArrayList<ArrayList<Double>> dataSetOutputs = new ArrayList<ArrayList<Double>>();
+	private ArrayList<ArrayList<Double>> dataSetInputs = new ArrayList<ArrayList<Double>>();
+	private ArrayList<ArrayList<Double>> dataSetOutputs = new ArrayList<ArrayList<Double>>();
 	
 	public void addDataSet(ArrayList<Double> input, ArrayList<Double> output){
-		dataSetInputs.add(input);
-		dataSetOutputs.add(output);
+		getDataSetInputs().add(input);
+		getDataSetOutputs().add(output);
 	}
+
+	public ArrayList<ArrayList<Double>> getDataSetInputs() {
+		return dataSetInputs;
+	}
+
+	
+	public ArrayList<ArrayList<Double>> getDataSetOutputs() {
+		return dataSetOutputs;
+	}
+	
+	public int size(){
+		return dataSetInputs.size(); // both inputs and outputs have the same size
+	}
+
+	
 }
 
 
@@ -41,6 +56,8 @@ public class NeuralNetworkInterface {
 		}
 
 	}
+	
+	private boolean isSystemReady = false;
 	
 	private Double commonLearningRate = null;
 	private Double commonMomentum = null;
@@ -83,12 +100,22 @@ public class NeuralNetworkInterface {
 	private boolean areBiasWeightValuesSet = false;
 	
 	
+	
 	/**
 	 * From here, the initialization region begins. 
 	 * 
 	 * 
 	 */
-
+	
+	/**
+	 * 
+	 * @param inputLayerAbst
+	 * @param outputLayerAbst
+	 */
+	public void setAbstraction(Integer inputLayerAbst, Integer outputLayerAbst) {
+		abstLayerInputs = inputLayerAbst;
+		abstLayerOutputs = outputLayerAbst;
+	}
 	/**
 	 * 
 	 * @param sizeLst
@@ -127,6 +154,8 @@ public class NeuralNetworkInterface {
 		
 		if(isLast) {
 			isSizeListSet = true;
+			abstLayerInputs = new Integer(0);
+			abstLayerOutputs = new Integer(sizeList.size() - 1);
 			return initializeSystem();
 		}
 		else return false;
@@ -184,10 +213,12 @@ public class NeuralNetworkInterface {
 	
 	
 	/**
+	 * This method sets the weight values randomly. The inputed rage determines 
+	 * the range within which the random values must vary. 
 	 * 
-	 * @param startRange
-	 * @param endRange
-	 * @return
+	 * @param startRange the lower limit of the weight values that are to be assigned randomly.
+	 * @param endRange  the upper limit of the weight values that are to be assigned randomly. 
+	 * @return returns true if the system is initialized. 
 	 * @throws Exception
 	 */
 	public boolean setWeightValues(Double startRange, Double endRange) throws Exception{
@@ -241,15 +272,20 @@ public class NeuralNetworkInterface {
 	
 	
 	/**
-	 * 
-	 * @param biasValues
-	 * @param biasWeights
+	 * This method initializes the bias weight values and the bias input values. 
+	 * this method gets called by the method `initialize`, to construct the bias 
+	 * system. The bias system contains a particular bias neuron for each neuron
+	 * in the system. This is done to maximize flexibility. 
 	 */
 	private void setBiasValuesInNetwork(){
 		Neuron temp;
 		int layerCount = constructNet.NNetwork.networkData.getNoOfLayers();
 		for(int i = 0; i < layerCount; i++){
 			for(int j = 0; j < constructNet.NNetwork.networkData.getNoOfNeuronsInLayer(i); j++){
+				
+				// <!> This code can be replaced with the method connectWith defined in the 
+			    // class Neuron. 
+				
 				temp = constructNet.NNetwork.networkData.getNeuron(i, j);
 				Neuron newNeuron = new Neuron();
 				newNeuron.input = newNeuron.outputResult = biasValues.get(i).get(j);
@@ -261,6 +297,11 @@ public class NeuralNetworkInterface {
 		}
 	}
 	/**
+	 * This is the initialization method. This initialization method helps in 
+	 * initializing the system based on the past information it already has. 
+	 * Depending on what variables are already set and what variables need to be
+	 * set, this method decided which initialization method needs to be called
+	 * after setting each variable. 
 	 * 
 	 * @return true when the network system is ready for training
 	 * @throws Exception
@@ -307,17 +348,149 @@ public class NeuralNetworkInterface {
 			areLearningRateMomentumSet = true;
 		}
 		
-		return (areLearningRateMomentumSet &&
+		isSystemReady = (areLearningRateMomentumSet &&
 				isNetworkAssignedToNeuralTrainer &&
 				areWeightValuesInitializedIntoNetwork &&
 				isNetworkConstructed &&
 				isNumberOfWeightsNeuronsSet &&
 				isDataSetSet &&
 				areBiasValuesInitializedIntoNetwork);
+		return isSystemReady;
+	}
+	
+	/**
+	 * This method is used for setting the training data-set for the 
+	 * training procedure. 
+	 * @param tDataSet contains the training data-set values
+	 * @return initializes and returns status
+	 * @throws Exception 
+	 */
+	public boolean setTrainingDataSet(TrainingDataSet tDataSet) throws Exception{
+		dataSet = tDataSet;
+		isDataSetSet = true;
+		return initializeSystem();
+	}
+	/**
+	 * This method sets the training data-set based on the set of inputs and its 
+	 * corresponding output set. This method sets this data-set one input-output
+	 * pair at a time. This process isn't expensive as the time-complexity for each 
+	 * addition is one. 
+	 * 
+	 * @param inputForSystem - The input that is to be given to the neural network 
+	 * 							system.
+	 * @param expectedOutput - the output that is expected from the system, given the 
+	 * 						   input `inputForSystem`. 
+	 * @return returns false always; this is because, the initialization method 
+	 * 					must not be called at this point. 
+	 * @throws Exception	
+	 */
+	public boolean setTrainingDataSet(ArrayList<Double> inputForSystem,
+			ArrayList<Double> expectedOutput) throws Exception{
+		dataSet.getDataSetInputs().add(inputForSystem);
+		dataSet.getDataSetOutputs().add(expectedOutput);
+		return false;
+	}
+	/**
+	 * This method sets the training data-set based on the set of inputs and its 
+	 * corresponding output set. This method sets this data-set one input-output
+	 * pair at a time. This process isn't expensive as the time-complexity for each 
+	 * addition is one.
+	 * 
+	 * But this method also comes with a method to denote if the added input-output
+	 * pair was the last one or not. 
+	 * @param inputForSystem The input that is to be given to the neural network 
+	 * 							system.
+	 * @param expectedOutput the output that is expected from the system, given the 
+	 * 						   input `inputForSystem`.
+	 * @param isLast
+	 * @return This returns true if two conditions satisfy. The first condition 
+	 * 			states if the data-set entered was the last one, then `isDataSetSet`
+	 * 			flag gets set and the system attempts to initialize the system. 
+	 * 			if the initialization is successful and if the system is ready to be used, 
+	 * 			then, true is returned. For all the other outcomes, false is returned. 
+	 * @throws Exception
+	 */
+	public boolean setTrainingDataSet(ArrayList<Double> inputForSystem,
+			ArrayList<Double> expectedOutput, boolean isLast ) throws Exception{
+		dataSet.getDataSetInputs().add(inputForSystem);
+		dataSet.getDataSetOutputs().add(expectedOutput);
+		if(isLast){
+			isDataSetSet = true;
+			return initializeSystem();
+		} else {
+			return false;
+		}
 	}
 	
 	
 	/*************************************************************************************
 	 * Initialization region ends here. 
 	 * */
+	/**
+	 * This trains the neural network system to adapt to the training data-set. 
+	 * @param setAbst if this value is set to true, it takes into account the 
+	 * 					initialized abstraction layers and sets the appropriate  
+	 * 					abstraction. 
+	 * @return returns the average error in the system. 
+	 * @throws Exception
+	 */
+	public double runTrainingSystem(boolean setAbst) throws Exception{
+		double error = 0.0; 
+	
+		for(int i = 0; i < dataSet.size(); i++){
+			
+			if(setAbst && (abstLayerInputs.intValue() == 0))
+				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
+			else if(setAbst){
+				neuralTrainer.NNetwork.setAbstraction(0, abstLayerOutputs);
+				neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
+				neuralTrainer.NNetwork.computeNetworkResult(0);
+				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
+				error += neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
+				continue;
+			}
+			
+			neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
+			error += neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
+		}
+		
+		error = error/dataSet.size();
+		return error;
+	}
+	
+	/**
+	 * This method simply evaluates the final result of the ANN system. 
+	 * 
+	 * @param systemInput this is the input that must be given to the system. 
+	 * @throws Exception 
+	 */
+	public ArrayList<Double> networkResult (ArrayList <Double> systemInput) throws Exception {
+		neuralTrainer.NNetwork.networkData.setInput(systemInput);
+		neuralTrainer.NNetwork.computeNetworkResult(0);
+		return NLayerToArray.obtainLayerOutputInArray(neuralTrainer.NNetwork.networkData.outputNeurons);
+	}
+	/**
+	 * This forms a connection between any two neurons in the network. This facility is 
+	 * specifically meant for allowing recursive neural networks. 
+	 * @param from
+	 * @param to
+	 * @param weight
+	 */
+	public void connect(NeuronAddress from, NeuronAddress to, Double weight)	{
+		Neuron fromNeuron = neuralTrainer.NNetwork.networkData.getNeuron(from.layerNo, from.neuronNo);
+		Neuron toNeuron = neuralTrainer.NNetwork.networkData.getNeuron(to.layerNo, to.neuronNo);
+		fromNeuron.connectWith(toNeuron, weight);
+	}
+	/**
+	 * This disconnects the connection from the `from` neuron and the `to` neuron
+	 * @param from
+	 * @param to
+	 * @throws Exception
+	 */
+	public void disconnect(NeuronAddress from, NeuronAddress to) throws Exception	{
+		Neuron fromNeuron = neuralTrainer.NNetwork.networkData.getNeuron(from.layerNo, from.neuronNo);
+		Neuron toNeuron = neuralTrainer.NNetwork.networkData.getNeuron(to.layerNo, to.neuronNo);
+		fromNeuron.disconnectWith(toNeuron);
+	}
+	
 }
