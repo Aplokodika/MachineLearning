@@ -80,6 +80,12 @@ public class NeuralNetworkInterface {
 	
 	private ArrayList<Activation> activationFunctions = new ArrayList<Activation>();
 	private boolean isActivationFunctionSet = false;
+		// this is for initializing 
+		// the output neurons with the same kind of activation functions and for 
+		// initializing the hidden layers with another kind of activation function.
+		private Activation outputActivationFunction = null; 
+		private Activation hiddenActivationFucntion = null;
+	
 	
 	private ConstructNetwork constructNet;
 	private boolean areWeightValuesInitializedIntoNetwork = false;
@@ -100,24 +106,37 @@ public class NeuralNetworkInterface {
 	private boolean areBiasWeightValuesSet = false;
 	
 	
-	
+	/**
+	 * This method directly initializes the learning rate and momentum values. And 
+	 * embeds them into the system. 
+	 *  
+	 * @param lRate
+	 * @param momentum
+	 * @return
+	 * @throws Exception
+	 */
 	public boolean  setLearningRateMomentum(Double lRate, Double momentum) throws Exception{
 		commonLearningRate = lRate;
 		commonMomentum = momentum;
 		return initializeSystem();
 	}
 	
-	public boolean  setActivationFunction(Activation hiddenFnc, Activation outputFnc) throws Exception{
-		
+	private void initializeActivationFunctions() throws Exception {
 		if(isSizeListSet == false)	{
 			Exception e = new Exception("Error: must initialize sizeList first ");
 			throw e;
 		}
 		for(int i = 0; i < noOfNeurons - sizeList.get(sizeList.size()-1); i++)
-			activationFunctions.add(hiddenFnc);
+			activationFunctions.add(hiddenActivationFucntion);
 		for(int i = 0; i < sizeList.get(sizeList.size()-1); i++)
-			activationFunctions.add(outputFnc);
+			activationFunctions.add(outputActivationFunction);
 		isActivationFunctionSet = true;
+		
+	}
+	
+	public boolean  setActivationFunction(Activation hiddenFnc, Activation outputFnc) throws Exception{
+		hiddenActivationFucntion = hiddenFnc;
+		outputActivationFunction = outputFnc;
 		return initializeSystem();
 	}
 	
@@ -333,6 +352,12 @@ public class NeuralNetworkInterface {
 			isNumberOfWeightsNeuronsSet = true;
 		}
 		
+		if(isActivationFunctionSet == false && outputActivationFunction != null &&
+				hiddenActivationFucntion != null) {
+			initializeActivationFunctions();
+			isActivationFunctionSet = true;
+		}
+		
 		if(isNetworkConstructed == false && isActivationFunctionSet == true &&
 				isSizeListSet == true ){
 			constructNet = 
@@ -462,7 +487,27 @@ public class NeuralNetworkInterface {
 	 * Initialization region ends here. 
 	 * */
 	/**
-	 * This trains the neural network system to adapt to the training data-set. 
+	 * This trains the neural network system to adapt to the training data-set.
+	 * 
+	 * ---Future update---
+	 * The system must have a mechanism to record the smallest error encountered
+	 * to be able to reverse the system to that state it was when the minimum error 
+	 * occurs. Over using this method will cause the system to quickly over-train
+	 * causing the white noise to have a greater impact over the neural network update 
+	 * system. 
+	 * 
+	 * This can be solved by adapting a mechanism to alternate the primitive mechanism 
+	 * with the one described above using probabilistic constrains. 
+	 * 
+	 * This update is required to make the software fit for any ANN use. 
+	 * 
+	 * Hint: write a method and a container to obtain all the weight values 
+	 * in the system. This can only be done by implementing the tree traversal 
+	 * algorithm in this current design. But the inefficiency caused by this need 
+	 * not be significant in altering the time complexity, unless the probability 
+	 * of using this new method is same as the probability of the system in 
+	 * using the primitive method is same. 
+	 *  
 	 * @param setAbst if this value is set to true, it takes into account the 
 	 * 					initialized abstraction layers and sets the appropriate  
 	 * 					abstraction. 
