@@ -1,3 +1,6 @@
+/*
+* copyright (c) 2016 K Sreram, All rights reserved
+*/
 package mainFnc;
 
 import neuralNetwork.*;
