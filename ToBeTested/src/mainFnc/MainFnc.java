@@ -37,54 +37,39 @@ public class MainFnc {
 	
 	public static void main(String [] arg) throws Exception{
 		NeuralNetworkInterface neuralNetwork = new NeuralNetworkInterface();
+		neuralNetwork.addSizeList(1);
 		neuralNetwork.addSizeList(3);
-		neuralNetwork.addSizeList(5);
-		neuralNetwork.addSizeList(3);
-		neuralNetwork.addSizeList(5);
-		neuralNetwork.addSizeList(3, true);
+		neuralNetwork.addSizeList(1, true);
 		
+		neuralNetwork.setActivationFunction(new ActFunction(), new ActFunction2());
+		neuralNetwork.setWeightValues(0.0, 1.0);
+		neuralNetwork.setBiasWeightValues(-1.0, 1.0, 1.0);
+		neuralNetwork.setNetworkOutputComputationToQuick();
+		neuralNetwork.setWeightCap(-1.0, 1.0);
 		
-		/// <!> Activation function initialization does not work when this
-		/// is called before addSizeList. Need to fix it 
-		neuralNetwork.setActivationFunction(new ActFunction (), new ActFunction2 ());
+		neuralNetwork.setLearningRateMomentum(0.1, 0.9);
+		neuralNetwork.setMaxMinError(10.0, 0.0);
 		
-		neuralNetwork.setWeightValues((double)0, (double)2);
-		neuralNetwork.setBiasWeightValues((double)0, (double) 2, (double) 1);
-		
-		
-		
-		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(1.0,2.0,3.0)) ,
-				new ArrayList<Double>(Arrays.asList(2.1,3.1,5.0)));
-		
-		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(2.0,2.0,5.0)) ,
-				new ArrayList<Double>(Arrays.asList(0.01,1.0,0.0)));
-		
-		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(1.0,5.0,5.0)) ,
-				new ArrayList<Double>(Arrays.asList(2.01,10.0,1.0)));
-		
-		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(3.0,3.0,3.0)) ,
-				new ArrayList<Double>(Arrays.asList(1.01,1.0,1.0)));
-		
-		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(2.0,2.0,2.0)) ,
-				new ArrayList<Double>(Arrays.asList(5.01,5.0,5.0)), true);
-		
-		if(neuralNetwork.setLearningRateMomentum(0.01, 0.9)) System.out.println("Awsome!!!");
-		else System.out.println("Npoooo");
-		ArrayList<String> errors =  neuralNetwork.getUnInitializedValues();
-		if(errors != null){
-			for(String str: errors){
-				System.out.println(str);
-			}
-		}
-		neuralNetwork.setAbstraction(0, 4);
 		for(int i = 0; i < 1000; i++)
-			neuralNetwork.runTrainingSystem(true);
-		
-		ArrayList <Double> result =
-				neuralNetwork.networkResult(new ArrayList<Double>(Arrays.asList(3.0,3.0,3.0)));
-		
-		for(int i = 0; i < 3; i++) {
-			System.out.println(result.get(i));
+		neuralNetwork.setTrainingDataSet(new ArrayList<Double> (Arrays.asList((double)i/1000)),
+				new ArrayList<Double> (Arrays.asList((double)i*i/1000000)));
+		if(neuralNetwork.setTrainingDataSet(new ArrayList<Double> (Arrays.asList((double)1)),
+				new ArrayList<Double> (Arrays.asList(((double)1))), true)) {
+			System.out.println("initialization successful");
 		}
+		else System.out.println("initialization failed");
+		Double errVal;
+		for(int i = 0; i < 1000 ; i++)	{
+			errVal = neuralNetwork.runTrainingSystem(new Double(2), false);
+			System.out.println(i + " Error = " + errVal );
+			//if(errVal.doubleValue() < .000001) break;
+		}
+		ArrayList<Double> ress;
+		for(int i = 1000; i < 1200; i++) {
+			ress = neuralNetwork.networkResult(new ArrayList<Double> (Arrays.asList((double)i/1000)));
+			System.out.println("Output = " + ress.get(0) + " Expected output = "+ ((double)i*i/1000000) );
+		}
+		
+		System.out.println("Least recorded error = " + neuralNetwork.getLeastRecordedError());
 	}
 }
