@@ -10,9 +10,16 @@ import java.util.ArrayList;
 
 public class ConstructNetwork  {
 
+	public enum NetworkResultComputationType {
+		quick, treeTraversal
+	}
+	
 	public ConstructNetwork( ArrayList<Activation> act, 
-			ComputeError errFnc, ArrayList<Integer> sizeList){
-		NNetwork = new NeuralNetwork(errFnc);
+			ComputeError errFnc, ArrayList<Integer> sizeList, NetworkResultComputationType type){
+		if(type.equals(NetworkResultComputationType.treeTraversal))
+			NNetwork = new NeuralNetwork(errFnc);
+		else if(type.equals(NetworkResultComputationType.quick) )
+			NNetwork = new NeuralNetworkQuick(errFnc);
 		NNetwork.networkData.initializeNeurons(sizeList, act);
 	}
 	

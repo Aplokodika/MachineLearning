@@ -58,10 +58,27 @@ public class NeuralNetwork {
 		networkData.resetFlagsNetLayers();
 	}*/
 	
+	
+	public void computeNetworkResultQuick(int startIndex) throws Exception {
+		for(int i = startIndex; i < networkData.hiddenLayers.size(); i++ ){
+			for(int j = 0; j < networkData.hiddenLayers.get(i).size(); j++){
+				networkData.hiddenLayers.get(i).get(j).pullInput();
+				networkData.hiddenLayers.get(i).get(j).computeOutput();
+			}
+		}
+		
+		for(int i = 0; i < networkData.outputNeurons.size(); i++)	{
+			networkData.outputNeurons.get(i).pullInput();
+			networkData.outputNeurons.get(i).computeOutput();
+		}
+	}
+	
 	/**
 	 * This computes the final output value based on the inputs from the
 	 * previous neurons, iterating through each layers. This method is called
 	 * after the `setInput` method gets called.
+	 * 
+	 * This uses tree traversal
 	 * 
 	 * @throws Exception
 	 */

@@ -106,6 +106,34 @@ public class NeuralNetworkInterface {
 	private boolean areBiasWeightValuesSet = false;
 	
 	
+	private boolean isTypeOfOutputEvaluationSet = false;
+	private ConstructNetwork.NetworkResultComputationType typeOfEvaluationFunction; 
+	
+	
+	private Double maxError = null, minError = null;
+	private boolean isMaxMinErrorSet = false;
+	
+	
+	
+	public boolean setMaxMinError(Double mxError, Double mnError) throws Exception {
+		maxError = mxError;
+		minError = mnError;
+		return initializeSystem();
+	}
+	
+	public boolean setNetworkOutputComputationToTreeTraversal() throws Exception {
+		typeOfEvaluationFunction = ConstructNetwork.NetworkResultComputationType.treeTraversal;
+		isTypeOfOutputEvaluationSet = true;
+		return initializeSystem();
+	}
+	
+	public boolean setNetworkOutputComputationToQuick() throws Exception {
+		typeOfEvaluationFunction = ConstructNetwork.NetworkResultComputationType.quick;
+		isTypeOfOutputEvaluationSet = true;
+		return initializeSystem();
+	}
+	
+	
 	/**
 	 * This method directly initializes the learning rate and momentum values. And 
 	 * embeds them into the system. 
@@ -359,10 +387,11 @@ public class NeuralNetworkInterface {
 		}
 		
 		if(isNetworkConstructed == false && isActivationFunctionSet == true &&
-				isSizeListSet == true ){
+				isSizeListSet == true && isTypeOfOutputEvaluationSet == true){
 			constructNet = 
 						new ConstructNetwork(activationFunctions,
-								new NeuralNetworkInterface.ErrorFunction(), sizeList);
+								new NeuralNetworkInterface.ErrorFunction(), sizeList,
+								typeOfEvaluationFunction);
 			isNetworkConstructed = true;	
 		}
 		
@@ -393,29 +422,62 @@ public class NeuralNetworkInterface {
 			areLearningRateMomentumSet = true;
 		}
 		
+		if(isMaxMinErrorSet == false && 
+				maxError != null &&
+				minError != null ){
+			neuralTrainer.setMaxMinError(maxError, minError);
+			isMaxMinErrorSet = true;
+		}
+		
 		isSystemReady = (areLearningRateMomentumSet &&
 				isNetworkAssignedToNeuralTrainer &&
 				areWeightValuesInitializedIntoNetwork &&
 				isNetworkConstructed &&
 				isNumberOfWeightsNeuronsSet &&
 				isDataSetSet &&
-				areBiasValuesInitializedIntoNetwork);
+				areBiasValuesInitializedIntoNetwork &&
+				isMaxMinErrorSet);
 		return isSystemReady;
 	}
 	
 	public ArrayList<String> getUnInitializedValues(){
 		ArrayList<String> result = new ArrayList<String>();
-		if(areLearningRateMomentumSet == false)		result.add("areLearningRateMomentumSet");
-		if(isNetworkAssignedToNeuralTrainer == false)	result.add("isNetworkAssignedToNeuralTrainer");
-		if(areWeightValuesInitializedIntoNetwork == false)	result.add("areWeightValuesInitializedIntoNetwork");
-		if(isNetworkConstructed == false)	result.add("isNetworkConstructed");
-		if(isNumberOfWeightsNeuronsSet == false)	result.add("isNumberOfWeightsNeuronsSet");
-		if(isDataSetSet == false)	result.add("isDataSetSet");
-		if(areBiasValuesInitializedIntoNetwork == false) result.add("areBiasValuesInitializedIntoNetwork");
-		
+		if(areLearningRateMomentumSet == false)		
+			result.add("areLearningRateMomentumSet");
+		if(isNetworkAssignedToNeuralTrainer == false)	
+			result.add("isNetworkAssignedToNeuralTrainer");
+		if(areWeightValuesInitializedIntoNetwork == false)	
+			result.add("areWeightValuesInitializedIntoNetwork");
+		if(isNetworkConstructed == false)	
+			result.add("isNetworkConstructed");
+		if(isNumberOfWeightsNeuronsSet == false)	
+			result.add("isNumberOfWeightsNeuronsSet");
+		if(isDataSetSet == false)	
+			result.add("isDataSetSet");
+		if(areBiasValuesInitializedIntoNetwork == false) 
+			result.add("areBiasValuesInitializedIntoNetwork");
+		if(isMaxMinErrorSet == false)
+			result.add("isMaxMinErrorSet");
 		if(result.size() == 0)
 			return null;
 		else return result;
+	}
+	
+	/**
+	 * This sets the weight-cap. It says how far weight values must vary, and 
+	 * thus keeps the weight values within the range.  
+	 * @param lowerLimit - the least possible weight value. 
+	 * @param upperLimit - the greatest possible weight value. 
+	 * @return
+	 */
+	
+	public boolean setWeightCap(Double lowerLimit, Double upperLimit) {
+		if(isNetworkAssignedToNeuralTrainer == true) {
+			neuralTrainer.cap.lowerLimit = lowerLimit;
+			neuralTrainer.cap.upperLimit = upperLimit;
+			return true;
+		}
+		return false;
 	}
 	
 	/**
@@ -514,9 +576,10 @@ public class NeuralNetworkInterface {
 	 * @return returns the average error in the system. 
 	 * @throws Exception
 	 */
-	public double runTrainingSystem(boolean setAbst) throws Exception{
+	public double runTrainingSystem(Double learningRateChangeFactor, 
+												boolean setAbst) throws Exception{
 		double error = 0.0; 
-	
+		
 		for(int i = 0; i < dataSet.size(); i++){
 			
 			if(setAbst && (abstLayerInputs.intValue() == 0))
@@ -526,16 +589,23 @@ public class NeuralNetworkInterface {
 				neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
 				neuralTrainer.NNetwork.computeNetworkResult(0);
 				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
-				error += neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
+				error += neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i),
+						learningRateChangeFactor);
+				
 				continue;
 			}
 			
 			neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
-			error += neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
+			error += neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i),
+					learningRateChangeFactor);
 		}
-		
 		error = error/dataSet.size();
+		neuralTrainer.setLeastError(error);
 		return error;
+	}
+	
+	public Double getLeastRecordedError() {
+		return neuralTrainer.getLeastRecorded();
 	}
 	
 	/**

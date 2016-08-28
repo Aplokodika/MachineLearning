@@ -41,14 +41,6 @@ public class NetworkData{
 	}
 	
 	
-	/*public void resetFlagsNetLayers(){
-		for(int i = 0; i < netLayers.size(); i++){
-			for(int j = 0; j < netLayers.get(i).size(); j++){
-				netLayers.get(i).get(j).callSession = NeuronCallSession.SESSION_1;
-			}
-		}
-	}*/
-	
 	public void initializeNeurons(ArrayList<Integer> sizeList, ArrayList<Activation> act){
 		int endSize = sizeList.size() - 1;
 		Neuron temp;
@@ -140,7 +132,6 @@ public class NetworkData{
 		for(int index = 0; index < inp.size(); index++){
 			inputNeurons.get(index).input = inputNeurons.get(index).outputResult 
 						= new Double(inp.get(index));
-			//inputNeurons.get(index).parentNeurons = null;
 		}
 	}
 	
