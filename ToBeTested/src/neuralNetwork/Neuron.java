@@ -22,18 +22,6 @@ import java.util.*;
 public class Neuron {
 	
 	
-	/*public static enum NeuronCallSession {
-		SESSION_1, SESSION_2
-	}
-	
-	public static NeuronCallSession reverseSession(NeuronCallSession session){
-		return (session == NeuronCallSession.SESSION_1)?
-				NeuronCallSession.SESSION_2: NeuronCallSession.SESSION_1; 
-	}
-	
-	public NeuronCallSession callSession =NeuronCallSession.SESSION_1 ;
-	*/
-	
 	public Neuron(){
 		this.setNeuronIndex(newNeuronIndex());
 	}
@@ -78,7 +66,7 @@ public class Neuron {
 	
 	
 	// The activation function of the neuron.
-	private Activation activation;
+	public Activation activation;
 	
 	private Activation getActivation() {
 		return activation;
@@ -120,6 +108,9 @@ public class Neuron {
 	public Double learningRate;
 	public Double momentum;
 	
+			
+	public Double gradient = null;
+	
 	
 	
 	/**
@@ -154,6 +145,8 @@ public class Neuron {
 	public boolean checkFeasibility(Integer index, Double change){
 		
 		if(Double.isInfinite(change))
+			return false;
+		if(Double.isNaN(change))
 			return false;
 		return true;
 	}

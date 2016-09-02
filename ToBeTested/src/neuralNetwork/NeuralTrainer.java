@@ -68,11 +68,9 @@ public class NeuralTrainer {
 	private Double checkChange(Double changeErrorAdd, Double changeErrorSub,
 									Double neuronError, Double change, 
 									Double weight) {
-		
-		if (changeErrorAdd.doubleValue() <= neuronError.doubleValue() &&
-				((weight.doubleValue() + change.doubleValue()) < cap.upperLimit)) {
-			if (changeErrorSub.doubleValue() <= neuronError.doubleValue()&&
-					((weight.doubleValue() - change.doubleValue()) > cap.lowerLimit)) {
+		//System.out.println("weight" + weight);
+		if (changeErrorAdd.doubleValue() <= neuronError.doubleValue() ) {
+			if (changeErrorSub.doubleValue() <= neuronError.doubleValue()) {
 				if (changeErrorAdd.doubleValue() < changeErrorSub.doubleValue()) {
 			
 					return change;
@@ -89,10 +87,10 @@ public class NeuralTrainer {
 			} else {
 				return change;
 			}
-		} else if (changeErrorSub.doubleValue() <= neuronError.doubleValue() &&
-				((weight.doubleValue() - change.doubleValue()) > cap.lowerLimit)) {
+		} else if (changeErrorSub.doubleValue() <= neuronError.doubleValue() ) {
 			return new Double( -change.doubleValue());
 		}
+		//System.out.println("Boo");
 		return null;
 	}
 	
@@ -102,12 +100,18 @@ public class NeuralTrainer {
 		return leastError;
 	}
 	
-	public void setLeastError(Double newError){
-		if(leastError == null)
+	public boolean setLeastError(Double newError){
+		boolean result = false;
+		if(leastError == null) {
 			leastError = newError;
-		else if(newError.doubleValue() < leastError.doubleValue())
+			result = true;
+		}
+		else if(newError.doubleValue() < leastError.doubleValue())	{
 			leastError = newError;
+			result = true;
+		}
 		// else, do nothing
+		return result; // becomes true when a change is made.
 	}
 	
 	private Double positiveValue(Double val) {
@@ -152,11 +156,6 @@ public class NeuralTrainer {
 		ArrayList<Double> annOutput =
 				NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
 		
-		/*if(leastError != null && probabilityOfUsingOldError > Math.random()){
-			neuronError = leastError;
-			//System.out.println("hit");
-		} else {*/
-			
 			neuronError = NNetwork.errorFunction.computeError(expectedOutput, annOutput);
 			if(neuronError.doubleValue() < maxError.doubleValue() &&
 					neuronError.doubleValue() > minError.doubleValue() ) {
@@ -166,17 +165,17 @@ public class NeuralTrainer {
 			}	else {
 				deltaError = new Double(0.0);
 			}
-		//}
-		
-		
+
 		Double changeErrorAdd = new Double(Double.MAX_VALUE);
 		Double changeErrorSub = changeErrorAdd;
 		Double change;
 		Double result = null;
-
+		Double curWeight;
+		Double qCur;
 		for (int i = 0; i < neuron.parentNeurons.size(); i++) {
 			preNeuron = neuron.parentNeurons.get(i);
-			if ((preNeuron.previousChangeValues.get(neuron.getNeuronIndex()) != null)
+			curWeight = preNeuron.weightValues.get(neuron.getNeuronIndex());
+			/*if ((preNeuron.previousChangeValues.get(neuron.getNeuronIndex()) != null)
 					&& (preNeuron.previousError.get(neuron.getNeuronIndex()) != null)) {
 				change = positiveValue((neuron.learningRate.doubleValue() * positiveValue(
 						neuronError.doubleValue() - preNeuron.previousError.get(neuron.getNeuronIndex())))
@@ -186,16 +185,34 @@ public class NeuralTrainer {
 				preNeuron = neuron.parentNeurons.get(i);
 				change = positiveValue(neuron.learningRate.doubleValue() * positiveValue(
 						neuronError.doubleValue() - preNeuron.previousError.get(neuron.getNeuronIndex())));
-				//System.out.println("Check point 2");
-			} else {
-				change = neuron.learningRate.doubleValue();
+			} else {*/
+			//neuronError.doubleValue() - neuron.previousError.get(neuron.getNeuronIndex())
+			change = positiveValue(neuron.learningRate.doubleValue() +
+					(neuron.momentum.doubleValue()
+							* (curWeight.doubleValue())));
 				
-				//System.out.println("Check point 3");
+			//}
+			//System.out.println("change 1 = " + change
+				//	+ "  learning rate :" + neuron.learningRate.doubleValue()
+					//+ "momentum :" + neuron.momentum.doubleValue() 
+					//+ "Cur weight :" + curWeight.doubleValue());
+			change =  (deltaError.doubleValue()/ deltaErrorNet.doubleValue())*
+					learningRateChangeFactor.doubleValue()*Math.random();
+			//System.out.println("Change = " + change);
+			/*if((change.doubleValue() + curWeight.doubleValue())
+						> cap.upperLimit.doubleValue()) {
+				change = 
+						new Double((cap.upperLimit.doubleValue() - curWeight.doubleValue())*Math.random() );
 			}
-			change += learningRateChangeFactor.doubleValue()*
-					(deltaError.doubleValue() / deltaErrorNet.doubleValue())*
-					2*Math.random();
+			else if((curWeight.doubleValue()-change.doubleValue() )
+					< cap.lowerLimit.doubleValue()) {
+				change = new Double((curWeight.doubleValue() - cap.lowerLimit.doubleValue())*Math.random());
+			}*/
 			
+			qCur = new Double (cap.upperLimit.doubleValue() - curWeight.doubleValue());
+			if(change.doubleValue() > 1)
+			change  = positiveValue(((change.doubleValue() - 1)/(change.doubleValue() + 1)) * 
+						qCur.doubleValue());
 			if (preNeuron.checkFeasibility(neuron.getNeuronIndex(), change)) {
 				preNeuron.updateWeight(neuron.getNeuronIndex(), change);
 				NNetwork.computeNetworkResult(0);// finds the result
@@ -228,23 +245,16 @@ public class NeuralTrainer {
 				else if(nowChange.doubleValue() > 0)
 					result = changeErrorSub;
 				else result = changeErrorSub;
-				
-				/// ************* TEST *********************************
-				/*System.out.println("Enter test 1");
-				boolean check = (neuronError.doubleValue() >= changeErrorAdd.doubleValue());
-				if(check)
-					System.out.println("Wow " + " Weight = " +
-										preNeuron.weightValues.get(neuron.getNeuronIndex()));
-				else System.out.println("What the ...? change: " 
-						+ changeErrorAdd + "cur :" + neuronError );*/
-				/// ****************************************************
 
 			} 
-				else  result = neuronError;
+				else  {
+					result = neuronError;
+				}
 		}
-		if(result == null)
-			System.out.println("Booooo");
-
+		
+		if(result.doubleValue() == 0.0){
+			System.out.println("Booo");
+		}
 		return result; // the current error is returned in case of now change
 	}
 	
@@ -264,20 +274,18 @@ public class NeuralTrainer {
 										Double learningRateChangeFactor) throws Exception {
 		Neuron tempNeuron;
 		Double result = null;
-		for (int layerIndex = 0; layerIndex < NNetwork.networkData.hiddenLayers.size(); layerIndex++) {
-			for (int nIndex = 0; nIndex < NNetwork.networkData.hiddenLayers.get(layerIndex).size(); nIndex++) {
-				tempNeuron = NNetwork.networkData.hiddenLayers.get(layerIndex).get(nIndex);
-				trainNeuron(tempNeuron, expectedOutput, learningRateChangeFactor);
-			}
-		}
-
 		for (int nIndex = 0; nIndex < NNetwork.networkData.outputNeurons.size(); nIndex++) {
 			tempNeuron = NNetwork.networkData.outputNeurons.get(nIndex);
 			result = trainNeuron(tempNeuron, expectedOutput, learningRateChangeFactor); 
 															  // the final error recorded 
 															  // is the error of the new system.
 		}
-		if(result == null) System.out.println("Booooo");
+		for (int layerIndex =  NNetwork.networkData.hiddenLayers.size()-1; layerIndex >= 0; layerIndex--) {
+			for (int nIndex = 0; nIndex < NNetwork.networkData.hiddenLayers.get(layerIndex).size(); nIndex++) {
+				tempNeuron = NNetwork.networkData.hiddenLayers.get(layerIndex).get(nIndex);
+				trainNeuron(tempNeuron, expectedOutput, learningRateChangeFactor);
+			}
+		}
 		return result;
 	}
 
