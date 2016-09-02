@@ -51,29 +51,14 @@ public class MainFnc {
 		neuralNetwork.addSizeList(3, true); // output neuron
 
 		neuralNetwork.setActivationFunction(new ActFunction(), new ActFunction2());
-		neuralNetwork.setWeightValues(-.5, .5);
+		neuralNetwork.setWeightValues(-1., 1.);
 		neuralNetwork.setBiasWeightValues(-.1, .1, 1.0);
 		neuralNetwork.setNetworkOutputComputationToQuick();
 		neuralNetwork.setWeightCap(-1.0, 1.0);
 
-		neuralNetwork.setLearningRateMomentum(0.1, 0.9999);
-		neuralNetwork.setMaxMinError(10.0, 0.0);
-
-		double k;
+		neuralNetwork.setLearningRateMomentum(0.5, 0.999);
 		Double errVal;
-		/*
-		 * if(neuralNetwork.setTrainingDataSet(new ArrayList<Double>
-		 * (Arrays.asList((double)100)), new ArrayList<Double>
-		 * (Arrays.asList(Math.cos(1))), true)) {
-		 * System.out.println("initialization successful"); } else
-		 * System.out.println("initialization failed");
-		 */
-		/*
-		 * for(int i = 0; i < 1000; i++) { k = Math.random()*Math.PI*1000;
-		 * neuralNetwork.setTrainingDataSet(new ArrayList<Double>
-		 * (Arrays.asList((double)k/10000)), new ArrayList<Double>
-		 * (Arrays.asList( ((Math.cos(k/100) > 0)? 1.0: -1.0) ))); }
-		 */
+		
 		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(0.5, 0.4, 0.3)),
 				new ArrayList<Double>(Arrays.asList(0.9, 0.001, 0.002)));
 		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(0.2, 0.2, 0.2)),
@@ -81,17 +66,16 @@ public class MainFnc {
 		neuralNetwork.setTrainingDataSet(new ArrayList<Double>(Arrays.asList(0.1, 0.1, 0.1)),
 				new ArrayList<Double>(Arrays.asList(0.9, 1.0, 0.8)), true);
 
-		neuralNetwork.runTrainingSystem(new Double(20), false);
-		 neuralNetwork.connect(new NeuronAddress(2, 1), new NeuronAddress(1,1), 1.0);
+		neuralNetwork.runTrainingSystem(false);
+		neuralNetwork.connect(new NeuronAddress(2, 1), new NeuronAddress(1,1), 1.0);
 		for (int ll = 0; ll < 1000; ll++) {
 			for (int i = 0; i < 1000; i++) {
-				errVal = neuralNetwork.runTrainingSystem(new Double(0.9), false);
-				System.out.println(i + " Error = " + errVal);
-				// if(errVal.doubleValue() < .000001) break;
+				errVal = neuralNetwork.runTrainingSystem( false);
+				System.out.println(ll + " Error = " + errVal);
 			}
 			neuralNetwork.setLoggedWeightValues();
 		}
-		neuralNetwork.setLoggedWeightValues();
+		//neuralNetwork.setLoggedWeightValues();
 
 		ArrayList<Double> ress;
 		double percentCal;
