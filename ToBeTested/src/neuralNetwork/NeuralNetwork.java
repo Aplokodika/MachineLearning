@@ -131,19 +131,7 @@ public class NeuralNetwork {
 				}
 			}
 		}
-		//currentSession = session;
 
 	}
-
-	/*
-	 * public void trainDataSet(ArrayList<Double>inputValues, ArrayList<Double>
-	 * expectedOutput) throws Exception{
-	 * 
-	 * networkData.setInput(inputValues); computeNetworkResult();
-	 * ArrayList<Double> outputs =
-	 * NLayerToArray.obtainLayerOutputInArray(networkData.outputNeurons);
-	 * 
-	 * }
-	 */
 
 }

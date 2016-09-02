@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 public class ConstructiveTrainer extends NeuralTrainer {
 
-	private Double leastCount = new Double(0.01); // the default least
-													// number
+	 private Double leastCount = new Double(0.01); // the default least
+	 												// number
 
 	private Double computeGradient(Neuron curNeuron) {
 		Double numerator = new Double(0.0);
@@ -27,9 +27,6 @@ public class ConstructiveTrainer extends NeuralTrainer {
 		// taking absolute value should be avoided here. Because the right to
 		// determine the direction
 		// of weight-value-change lies with the output neurons.
-		// System.out.println("(numerator.doubleValue() /
-		// denominator.doubleValue()) = " +
-		// numerator.doubleValue() + " " + denominator.doubleValue());
 		return (numerator.doubleValue() / denominator.doubleValue());
 	}
 
@@ -68,16 +65,15 @@ public class ConstructiveTrainer extends NeuralTrainer {
 		}
 	}
 
-	public void setWeight(Neuron neuron){
+	public void setWeight(Neuron neuron) {
 		Neuron preNeuron;
 		for (int i = 0; i < neuron.parentNeurons.size(); i++) {
 			preNeuron = neuron.parentNeurons.get(i);
-				preNeuron.weightValues.put(neuron.getNeuronIndex(),
-						newWeightValues.get(iterativeIndexForNewWeightValues));
-				iterativeIndexForNewWeightValues++;
+			preNeuron.weightValues.put(neuron.getNeuronIndex(), newWeightValues.get(iterativeIndexForNewWeightValues));
+			iterativeIndexForNewWeightValues++;
 		}
 	}
-	
+
 	public Double trainNeuron(Neuron neuron, Double expectedOutput) {
 		Neuron preNeuron;
 		computeOutputOfNeuron(neuron);
@@ -87,35 +83,23 @@ public class ConstructiveTrainer extends NeuralTrainer {
 		Double change = new Double(0.0);
 
 		if (expectedOutput != null) {
-			gradient = Math.abs((expectedOutput.doubleValue() - neuronOutputInitial.doubleValue()))
-					* leastCount.doubleValue();
+			gradient = Math.abs(expectedOutput.doubleValue() - neuronOutputInitial.doubleValue())
+						* leastCount.doubleValue();
 		} else {
 			gradient = computeGradient(neuron);
 		}
-
+	
 		for (int i = 0; i < neuron.parentNeurons.size(); i++) {
 			preNeuron = neuron.parentNeurons.get(i);
 			curWeight = preNeuron.getWeight(neuron.getNeuronIndex());
-			// System.out.println(curWeight);
-			// if(preNeuron.activation == null) {
-			// System.out.println("How ??");
-			// }
+			
 			if (expectedOutput != null) {
 
-				// Double neuronDeltaOutput = computeOutputOfNeuron(neuron,
-				// leastCount);
-				// Double fxPlusDelxMinusFx = neuronDeltaOutput.doubleValue() -
-				// neuronOutputInitial.doubleValue();
-				// System.out.println("neuronDeltaOutput.doubleValue() = " +
-				// neuronDeltaOutput.doubleValue() +
-				// " neuronOutputInitial.doubleValue() = "
-				// +neuronOutputInitial.doubleValue());
-
-				// System.out.println(gradient);
+				change = new Double(Math.abs(neuron.learningRate.doubleValue()
+						* (gradient.doubleValue() + preNeuron.outputResult.doubleValue() * curWeight.doubleValue()
+								* neuron.momentum.doubleValue())));
+				
 				if (expectedOutput.doubleValue() > neuronOutputInitial.doubleValue()) {
-					change = new Double(Math.abs(neuron.learningRate.doubleValue()
-							* (gradient.doubleValue() + preNeuron.outputResult.doubleValue() * curWeight.doubleValue()
-									* neuron.momentum.doubleValue())));
 					if ((change.doubleValue() + preNeuron.getWeight(neuron.getNeuronIndex())) <= cap.upperLimit
 							.doubleValue()) {
 						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
@@ -126,24 +110,19 @@ public class ConstructiveTrainer extends NeuralTrainer {
 					neuron.gradient = gradient;
 
 				} else if (expectedOutput.doubleValue() < neuronOutputInitial.doubleValue()) {
-					change = new Double(Math.abs(neuron.learningRate.doubleValue()
-							* (gradient.doubleValue() + preNeuron.outputResult.doubleValue() * curWeight.doubleValue()
-									* neuron.momentum.doubleValue())));
 					change = -change.doubleValue();
 					if ((change.doubleValue() + preNeuron.getWeight(neuron.getNeuronIndex())) >= cap.lowerLimit
 							.doubleValue()) {
 						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
 					} else {
 						preNeuron.updateWeight(neuron.getNeuronIndex(),
-								Math.random() * (preNeuron.getWeight(neuron.getNeuronIndex()) - cap.lowerLimit));
+								Math.random() * (preNeuron.getWeight(neuron.getNeuronIndex()) - cap.lowerLimit.doubleValue()));
 					}
 					neuron.gradient = -gradient.doubleValue();
 				} else {
 					neuron.gradient = new Double(0.0);
 				}
-				lastVisitedWeightSet.add(preNeuron.getWeight(neuron.getNeuronIndex()));
 			} else {
-				// gradient = computeGradient(neuron);
 				change = new Double(Math.abs(neuron.learningRate.doubleValue()
 						* (gradient.doubleValue() + preNeuron.outputResult.doubleValue() * curWeight.doubleValue()
 								* neuron.momentum.doubleValue())));
@@ -154,7 +133,7 @@ public class ConstructiveTrainer extends NeuralTrainer {
 						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
 					} else {
 						preNeuron.updateWeight(neuron.getNeuronIndex(),
-								Math.random() * (preNeuron.getWeight(neuron.getNeuronIndex()) - cap.lowerLimit));
+								Math.random() * (preNeuron.getWeight(neuron.getNeuronIndex()) - cap.lowerLimit.doubleValue()));
 					}
 
 				} else {
@@ -166,18 +145,16 @@ public class ConstructiveTrainer extends NeuralTrainer {
 								* (cap.upperLimit.doubleValue() - preNeuron.getWeight(neuron.getNeuronIndex())));
 					}
 				}
-				lastVisitedWeightSet.add(preNeuron.getWeight(neuron.getNeuronIndex()));
 				neuron.gradient = gradient.doubleValue();
 			}
+			lastVisitedWeightSet.add(preNeuron.getWeight(neuron.getNeuronIndex()));
 
-			// System.out.println(gradient);
 		}
 
 		return null;
 	}
 
-	@Override
-	public Double trainNetwork(ArrayList<Double> expectedOutput, Double learningRateChangeFactor) throws Exception {
+	public Double trainNetwork(ArrayList<Double> expectedOutput) throws Exception {
 		Neuron tempNeuron;
 		NNetwork.computeNetworkResult(0);
 		lastVisitedWeightSet = new ArrayList<Double>();
@@ -195,7 +172,7 @@ public class ConstructiveTrainer extends NeuralTrainer {
 		}
 		return null;
 	}
-	
+
 	public Double computeError(ArrayList<Double> expectedOutput) throws Exception {
 		NNetwork.computeNetworkResult(0);
 		ArrayList<Double> annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);

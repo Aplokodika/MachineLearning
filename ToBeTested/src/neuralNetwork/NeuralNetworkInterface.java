@@ -100,10 +100,8 @@ public class NeuralNetworkInterface {
 	private boolean isNetworkConstructed = false;
 	private boolean areLearningRateMomentumSet = false;
 	private boolean areBiasValuesInitializedIntoNetwork = false;
-	///********** TEST CHANGE **************************************
-		//private NeuralTrainer neuralTrainer = new NeuralTrainer();
-		private ConstructiveTrainer neuralTrainer = new ConstructiveTrainer();
 	
+	private ConstructiveTrainer neuralTrainer = new ConstructiveTrainer();
 	private boolean isNetworkAssignedToNeuralTrainer = false;
 	
 	private ArrayList<Double> weightValues = new ArrayList<Double>();
@@ -117,22 +115,11 @@ public class NeuralNetworkInterface {
 	
 	
 	private boolean isTypeOfOutputEvaluationSet = false;
-	private ConstructNetwork.NetworkResultComputationType typeOfEvaluationFunction; 
-	
-	
-	private Double maxError = null, minError = null;
-	private boolean isMaxMinErrorSet = false;
-	
+	private ConstructNetwork.NetworkResultComputationType typeOfEvaluationFunction; 	
 	
 	public ArrayList<ArrayList<Neuron> > biasNeurons = new ArrayList<ArrayList <Neuron>>();
 	private ArrayList< Double > weightLog = new ArrayList<Double>();
 	
-	
-	public boolean setMaxMinError(Double mxError, Double mnError) throws Exception {
-		maxError = mxError;
-		minError = mnError;
-		return initializeSystem();
-	}
 	
 	public boolean setNetworkOutputComputationToTreeTraversal() throws Exception {
 		typeOfEvaluationFunction = ConstructNetwork.NetworkResultComputationType.treeTraversal;
@@ -437,12 +424,6 @@ public class NeuralNetworkInterface {
 			areLearningRateMomentumSet = true;
 		}
 		
-		if(isMaxMinErrorSet == false && 
-				maxError != null &&
-				minError != null ){
-			neuralTrainer.setMaxMinError(maxError, minError);
-			isMaxMinErrorSet = true;
-		}
 		
 		isSystemReady = (areLearningRateMomentumSet &&
 				isNetworkAssignedToNeuralTrainer &&
@@ -450,8 +431,7 @@ public class NeuralNetworkInterface {
 				isNetworkConstructed &&
 				isNumberOfWeightsNeuronsSet &&
 				isDataSetSet &&
-				areBiasValuesInitializedIntoNetwork &&
-				isMaxMinErrorSet);
+				areBiasValuesInitializedIntoNetwork);
 		return isSystemReady;
 	}
 	
@@ -471,8 +451,6 @@ public class NeuralNetworkInterface {
 			result.add("isDataSetSet");
 		if(areBiasValuesInitializedIntoNetwork == false) 
 			result.add("areBiasValuesInitializedIntoNetwork");
-		if(isMaxMinErrorSet == false)
-			result.add("isMaxMinErrorSet");
 		if(result.size() == 0)
 			return null;
 		else return result;
@@ -591,8 +569,7 @@ public class NeuralNetworkInterface {
 	 * @return returns the average error in the system. 
 	 * @throws Exception
 	 */
-	public double runTrainingSystem(Double learningRateChangeFactor, 
-												boolean setAbst) throws Exception{
+	public double runTrainingSystem( boolean setAbst) throws Exception{
 		double error = 0.0; 
 		
 		for(int i = 0; i < dataSet.size(); i++){
@@ -604,18 +581,16 @@ public class NeuralNetworkInterface {
 				neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
 				neuralTrainer.NNetwork.computeNetworkResult(0);
 				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
-				neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i),
-						learningRateChangeFactor);
-				error += neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
+				neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
+				neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
 				continue;
 			}
 			
 			neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
-			neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i),
-					learningRateChangeFactor);
-			error += neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
+			neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
+			neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
 		}
-		error = error/dataSet.size();
+		error = computeError(setAbst);
 		if(neuralTrainer.setLeastError(error)) {
 			weightLog = neuralTrainer.retriveWeightValues();
 		}
