@@ -6,8 +6,6 @@ package neuralNetwork.neuralInterface;
 
 import java.util.ArrayList;
 
-import neuralNetwork.ComputeError;
-import neuralNetwork.NLayerToArray;
 import neuralNetwork.Neuron;
 import neuralNetwork.NeuronAddress;
 
@@ -20,33 +18,13 @@ import neuralNetwork.NeuronAddress;
  *
  */
 public class NeuralNetworkInterface extends TriggerInterface{
-	private static Double positive(Double val) {
-		if(val.doubleValue() < 0) 
-			return -val.doubleValue();
-		return val;
-	}
+	
 	/**
 	 * 
 	 * @author sreram
 	 *
 	 */
-	public static class ErrorFunction implements ComputeError {
 
-		@Override
-		public Double computeError(ArrayList<Double> expectedOut, ArrayList<Double> obtainedOut) {
-			Double result = new Double((double) 0);
-
-			Double val;
-			for (int i = 0; i < expectedOut.size(); i++) {
-				val = positive(expectedOut.get(i).doubleValue() - obtainedOut.get(i).doubleValue());
-				result = result.doubleValue() + val.doubleValue()*
-						val.doubleValue();
-			}
-
-			return result;
-		}
-
-	}
 	
 	
 	
@@ -162,75 +140,50 @@ public class NeuralNetworkInterface extends TriggerInterface{
 	 * 					abstraction. 
 	 * @return returns the average error in the system. 
 	 * @throws Exception
+	 * 
+	 * 
+		neuralTrainer.trainNetwork(errorList);	
 	 */
-	public double runTrainingSystem( boolean setAbst) throws Exception{
-		double error = 0.0; 
+	public void runTrainingSystem( boolean setAbst) throws Exception{
+		TrainingDataSet.trainingDataUnit trainerHandle;
 		
-		for(int i = 0; i < dataSet.size(); i++){
-			
-			if(setAbst && (abstLayerInputs.intValue() == 0))
-				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
-			else if(setAbst){
-				neuralTrainer.NNetwork.setAbstraction(0, abstLayerOutputs);
-				neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
-				neuralTrainer.NNetwork.computeNetworkResult(0);
-				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
-				neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
-				neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
-				continue;
+		if(setAbst)
+			neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
+		
+		for(int i = 0; i < dataSet.size(); i++)
+			{
+				trainerHandle = dataSet.getTrainerHandle(i);
+				neuralTrainer.trainNetwork(trainerHandle);
+
 			}
-			
-			neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
-			neuralTrainer.trainNetwork(dataSet.getDataSetOutputs().get(i));
-			neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
-		}
-		error = computeError(setAbst);
-		if(neuralTrainer.setLeastError(error)) {
-			weightLog = neuralTrainer.retriveWeightValues();
-		}
-		return error;
 	}
 	
-	public Double computeError(boolean setAbst) throws Exception {
-		double error = 0.0;
-		for(int i = 0; i < dataSet.size(); i++){
-			if(setAbst && (abstLayerInputs.intValue() == 0))
-				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
-			else if(setAbst){
-				neuralTrainer.NNetwork.setAbstraction(0, abstLayerOutputs);
-				neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
-				neuralTrainer.NNetwork.computeNetworkResult(0);
-				neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
+	public ArrayList<Double> getWeightValues() {
+		return neuralTrainer.retriveWeightValues();
+	}
 	
-				error += neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
-				continue;
-			}
-			neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
-			error += neuralTrainer.computeError(dataSet.getDataSetOutputs().get(i));
+	public Double computeError(boolean setAbst) {
+		double error = 0.0;
+		if(setAbst )
+			neuralTrainer.NNetwork.setAbstraction(abstLayerInputs, abstLayerOutputs);
+		for(int i = 0; i < dataSet.size(); i++){
+						neuralTrainer.NNetwork.networkData.setInput(dataSet.getDataSetInputs().get(i));
+			error += neuralTrainer.computeError(dataSet.getDataSetInputs().get(i), 
+					dataSet.getDataSetOutputs().get(i));
 		}
 		error = error/dataSet.size();
 		return error;
 	}
 	
-	public void setLoggedWeightValues() {
-		neuralTrainer.setWeightValues(weightLog);
+	
+	public void setWeightValuesDynimic(ArrayList<Double> dyn){
+		neuralTrainer.setWeightValues(dyn);
 	}
 	
 	public Double getLeastRecordedError() {
 		return neuralTrainer.getLeastRecorded();
 	}
 	
-	/**
-	 * This method simply evaluates the final result of the ANN system. 
-	 * 
-	 * @param systemInput this is the input that must be given to the system. 
-	 * @throws Exception 
-	 */
-	public ArrayList<Double> networkResult (ArrayList <Double> systemInput) throws Exception {
-		neuralTrainer.NNetwork.networkData.setInput(systemInput);
-		neuralTrainer.NNetwork.computeNetworkResult(0);
-		return NLayerToArray.obtainLayerOutputInArray(neuralTrainer.NNetwork.networkData.outputNeurons);
-	}
 	/**
 	 * This forms a connection between any two neurons in the network. This facility is 
 	 * specifically meant for allowing recursive neural networks. 
@@ -254,5 +207,11 @@ public class NeuralNetworkInterface extends TriggerInterface{
 		Neuron toNeuron = neuralTrainer.NNetwork.networkData.getNeuron(to.layerNo, to.neuronNo);
 		fromNeuron.disconnectWith(toNeuron);
 	}
+	
+	
+	public TrainingDataSet getTrainingDataSet(){
+		return dataSet;	
+	}
+
 	
 }

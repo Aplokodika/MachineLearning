@@ -19,7 +19,7 @@ public class TriggerInterface {
 	protected Integer abstLayerOutputs = null;
 	
 	
-	protected TrainingDataSet dataSet = new TrainingDataSet();
+	public TrainingDataSet dataSet = new TrainingDataSet(this);
 	protected boolean isDataSetSet = false;
 	
 	protected ArrayList<Integer> sizeList = new ArrayList<Integer>();
@@ -45,7 +45,7 @@ public class TriggerInterface {
 	protected boolean areLearningRateMomentumSet = false;
 	protected boolean areBiasValuesInitializedIntoNetwork = false;
 	
-	protected ConstructiveTrainer neuralTrainer = new ConstructiveTrainer();
+	protected NeuralTrainer neuralTrainer = new ConstructiveTrainer();
 	protected boolean isNetworkAssignedToNeuralTrainer = false;
 	
 	protected ArrayList<Double> weightValues = new ArrayList<Double>();
@@ -64,7 +64,7 @@ public class TriggerInterface {
 	protected ArrayList<ArrayList<Neuron> > biasNeurons = new ArrayList<ArrayList <Neuron>>();
 	protected ArrayList< Double > weightLog = new ArrayList<Double>();
 	
-	
+
 	public boolean setNetworkOutputComputationToTreeTraversal() throws Exception {
 		typeOfEvaluationFunction = ConstructNetwork.NetworkResultComputationType.treeTraversal;
 		isTypeOfOutputEvaluationSet = true;
@@ -74,9 +74,14 @@ public class TriggerInterface {
 	public boolean setNetworkOutputComputationToQuick() throws Exception {
 		typeOfEvaluationFunction = ConstructNetwork.NetworkResultComputationType.quick;
 		isTypeOfOutputEvaluationSet = true;
+		
 		return initializeSystem();
 	}
 	
+	
+	public NeuralTrainer getNeuralTrainer() {
+		return neuralTrainer;
+	}
 	
 	/**
 	 * This method directly initializes the learning rate and momentum values. And 
@@ -87,10 +92,16 @@ public class TriggerInterface {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean  setLearningRateMomentum(Double lRate, Double momentum) throws Exception{
+	public boolean  initializeLearningRateMomentum(Double lRate, Double momentum) throws Exception{
 		commonLearningRate = lRate;
 		commonMomentum = momentum;
+
 		return initializeSystem();
+	}
+	
+	
+	public void  setLearningRateMomentum(Double lRate, Double momentum) throws Exception{
+		neuralTrainer.NNetwork.networkData.setLearningRateMomentum(lRate, momentum);
 	}
 	
 	private void initializeActivationFunctions() throws Exception {
@@ -177,7 +188,8 @@ public class TriggerInterface {
 	
 	
 	/**
-	 * 
+	 * This is for initial initialization. This cannot be used for changing the weight values dynamically. 
+	 * For initializing dynamically, call: setWeightValuesDynimic(ArrayList<Double>)
 	 * @param weights
 	 * @return
 	 * @throws Exception
@@ -219,7 +231,7 @@ public class TriggerInterface {
 	 */
 	private Double randomValue(Double startRange, Double endRange){
 		return (startRange.doubleValue() + 
-				Math.random() * (endRange.doubleValue() - startRange.doubleValue())); 
+				Math.random() * (endRange.doubleValue() - startRange.doubleValue())) + startRange.doubleValue(); 
 	}
 	
 	
@@ -308,7 +320,13 @@ public class TriggerInterface {
 				temp.parentNeurons.add(newNeuron);
 			}
 		}
+		constructNet.NNetwork.networkData.biasNeurons = biasNeurons;
 	}
+	
+	public ArrayList<ArrayList<Neuron>> getBiasNeurons(){
+		return biasNeurons;
+	}
+	
 	/**
 	 * This is the initialization method. This initialization method helps in 
 	 * initializing the system based on the past information it already has. 
@@ -336,7 +354,7 @@ public class TriggerInterface {
 				isSizeListSet == true && isTypeOfOutputEvaluationSet == true){
 			constructNet = 
 						new ConstructNetwork(activationFunctions,
-								new NeuralNetworkInterface.ErrorFunction(), sizeList,
+								new ErrorFunction(), sizeList,
 								typeOfEvaluationFunction);
 			isNetworkConstructed = true;	
 		}
@@ -363,7 +381,7 @@ public class TriggerInterface {
 		if(areLearningRateMomentumSet == false && isNetworkConstructed == true &&
 				commonLearningRate != null && commonMomentum != null ){
 			constructNet.NNetwork.
-				networkData.setCommonLearningRateMomentum(sizeList, commonLearningRate,
+				networkData.setLearningRateMomentum(commonLearningRate,
 						commonMomentum);
 			areLearningRateMomentumSet = true;
 		}
@@ -400,5 +418,19 @@ public class TriggerInterface {
 		else return result;
 	}
 	
+	/**
+	 * This method simply evaluates the final result of the ANN system. 
+	 * 
+	 * @param systemInput this is the input that must be given to the system. 
+	 * @throws Exception 
+	 */
+	public ArrayList<Double> networkResult (ArrayList <Double> systemInput) {
+		neuralTrainer.NNetwork.networkData.setInput(systemInput);
+		neuralTrainer.NNetwork.computeNetworkResult(0);
+		return NLayerToArray.obtainLayerOutputInArray(neuralTrainer.NNetwork.networkData.outputNeurons);
+	}
+	public ArrayList<Neuron> getOutputLayer() {
+		return this.neuralTrainer.NNetwork.networkData.outputNeurons;
+	}
 	
 }
