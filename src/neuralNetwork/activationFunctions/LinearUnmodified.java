@@ -7,4 +7,10 @@ public class LinearUnmodified implements Activation {
 		return inp.doubleValue();
 	}
 
+	@Override
+	public double activationDifferential(Double input, Double outputResult) {
+		return 1;
+	}
+	
+
 }
