@@ -1,9 +1,11 @@
 package neuralNetwork;
 /*
- * Copyright (c) 2016 K Sreram, All rights reserved. 
+ * Copyright (c) 2016 K Sreram, All rights reserved.
  */
 
 import java.util.ArrayList;
+
+import neuralNetwork.neuralInterface.TrainingDataSet;
 
 /**
  * 
@@ -12,22 +14,18 @@ import java.util.ArrayList;
  */
 public class ConstructiveTrainer extends NeuralTrainer {
 
-	 private Double leastCount = new Double(0.01); // the default least
-	 												// number
-
-	private Double computeGradient(Neuron curNeuron) {
-		Double numerator = new Double(0.0);
-		Double denominator = new Double(0.0);
+	
+	private Double computeError(Neuron curNeuron) {
+		Double result = new Double(0.0);
 		for (int i = 0; i < curNeuron.childNeurons.size(); i++) {
-			numerator = numerator.doubleValue() + curNeuron.childNeurons.get(i).gradient.doubleValue()
-					* curNeuron.getWeight(curNeuron.childNeurons.get(i).getNeuronIndex());
-			denominator = denominator.doubleValue()
-					+ curNeuron.getWeight(curNeuron.childNeurons.get(i).getNeuronIndex());
+			result = result.doubleValue() + curNeuron.childNeurons.get(i).error.doubleValue()
+					* curNeuron.getWeight(curNeuron.childNeurons.get(i).getNeuronIndex())*
+					curNeuron.childNeurons.get(i).differentialValue;
 		}
 		// taking absolute value should be avoided here. Because the right to
 		// determine the direction
 		// of weight-value-change lies with the output neurons.
-		return (numerator.doubleValue() / denominator.doubleValue());
+		return result;
 	}
 
 	public static Double computeOutputOfNeuron(Neuron neuron) {
@@ -74,109 +72,51 @@ public class ConstructiveTrainer extends NeuralTrainer {
 		}
 	}
 
-	public Double trainNeuron(Neuron neuron, Double expectedOutput) {
-		Neuron preNeuron;
-		computeOutputOfNeuron(neuron);
-		Double neuronOutputInitial = neuron.outputResult;
-		Double gradient;
-		Double curWeight;
-		Double change = new Double(0.0);
-
-		if (expectedOutput != null) {
-			gradient = Math.abs(expectedOutput.doubleValue() - neuronOutputInitial.doubleValue())
-						* leastCount.doubleValue();
-		} else {
-			gradient = computeGradient(neuron);
-		}
 	
-		for (int i = 0; i < neuron.parentNeurons.size(); i++) {
+	private void trainNeuron(Neuron neuron) {
+		Neuron preNeuron;
+		Double change;
+		Double deltaW;
+		Double curWeight;
+		for (int i = 0; i < neuron.parentNeurons.size(); i++) {			
 			preNeuron = neuron.parentNeurons.get(i);
 			curWeight = preNeuron.getWeight(neuron.getNeuronIndex());
-			
-			if (expectedOutput != null) {
+			lastVisitedWeightSet.add(curWeight);
+			neuron.differentialValue = neuron.activation.activationDifferential(neuron.input, neuron.outputResult);
+			deltaW = neuron.error*
+					 neuron.differentialValue*
+					 preNeuron.outputResult * NNetwork.networkData.learningRate;
+			change = deltaW + 
+					 NNetwork.networkData.momentum * 
+					 ((preNeuron.preChangeInWeight.get(neuron.getNeuronIndex()) != null)?
+						 preNeuron.preChangeInWeight.get(neuron.getNeuronIndex()) : 0.0);
 
-				change = new Double(Math.abs(neuron.learningRate.doubleValue()
-						* (gradient.doubleValue() + preNeuron.outputResult.doubleValue() * curWeight.doubleValue()
-								* neuron.momentum.doubleValue())));
-				
-				if (expectedOutput.doubleValue() > neuronOutputInitial.doubleValue()) {
-					if ((change.doubleValue() + preNeuron.getWeight(neuron.getNeuronIndex())) <= cap.upperLimit
-							.doubleValue()) {
-						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
-					} else {
-						preNeuron.updateWeight(neuron.getNeuronIndex(), Math.random()
-								* (cap.upperLimit.doubleValue() - preNeuron.getWeight(neuron.getNeuronIndex())));
-					}
-					neuron.gradient = gradient;
-
-				} else if (expectedOutput.doubleValue() < neuronOutputInitial.doubleValue()) {
-					change = -change.doubleValue();
-					if ((change.doubleValue() + preNeuron.getWeight(neuron.getNeuronIndex())) >= cap.lowerLimit
-							.doubleValue()) {
-						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
-					} else {
-						preNeuron.updateWeight(neuron.getNeuronIndex(),
-								Math.random() * (preNeuron.getWeight(neuron.getNeuronIndex()) - cap.lowerLimit.doubleValue()));
-					}
-					neuron.gradient = -gradient.doubleValue();
-				} else {
-					neuron.gradient = new Double(0.0);
-				}
-			} else {
-				change = new Double(Math.abs(neuron.learningRate.doubleValue()
-						* (gradient.doubleValue() + preNeuron.outputResult.doubleValue() * curWeight.doubleValue()
-								* neuron.momentum.doubleValue())));
-				if (gradient.doubleValue() < 0) {
-					change = new Double(-change.doubleValue());
-					if ((change.doubleValue() + preNeuron.getWeight(neuron.getNeuronIndex())) >= cap.lowerLimit
-							.doubleValue()) {
-						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
-					} else {
-						preNeuron.updateWeight(neuron.getNeuronIndex(),
-								Math.random() * (preNeuron.getWeight(neuron.getNeuronIndex()) - cap.lowerLimit.doubleValue()));
-					}
-
-				} else {
-					if (change.doubleValue() + preNeuron.getWeight(neuron.getNeuronIndex()) <= cap.upperLimit
-							.doubleValue()) {
-						preNeuron.updateWeight(neuron.getNeuronIndex(), change.doubleValue());
-					} else {
-						preNeuron.updateWeight(neuron.getNeuronIndex(), Math.random()
-								* (cap.upperLimit.doubleValue() - preNeuron.getWeight(neuron.getNeuronIndex())));
-					}
-				}
-				neuron.gradient = gradient.doubleValue();
-			}
-			lastVisitedWeightSet.add(preNeuron.getWeight(neuron.getNeuronIndex()));
-
+			preNeuron.weightValues.put(neuron.getNeuronIndex(), 
+					preNeuron.weightValues.get(neuron.getNeuronIndex()) + change.doubleValue());
+			preNeuron.preChangeInWeight.put(neuron.getNeuronIndex(), deltaW);
 		}
-
-		return null;
 	}
 
-	public Double trainNetwork(ArrayList<Double> expectedOutput) throws Exception {
+	public void trainNetwork(TrainingDataSet.trainingDataUnit trainingDataUnit) {
+		
 		Neuron tempNeuron;
+		NNetwork.networkData.setInput(trainingDataUnit.inputs);
 		NNetwork.computeNetworkResult(0);
 		lastVisitedWeightSet = new ArrayList<Double>();
 		for (int nIndex = 0; nIndex < NNetwork.networkData.outputNeurons.size(); nIndex++) {
 			tempNeuron = NNetwork.networkData.outputNeurons.get(nIndex);
-			trainNeuron(tempNeuron, expectedOutput.get(nIndex));
-			// the final error recorded
-			// is the error of the new system.
+			tempNeuron.error = trainingDataUnit.errors.get(nIndex);
+			trainNeuron(tempNeuron);
 		}
 		for (int layerIndex = NNetwork.networkData.hiddenLayers.size() - 1; layerIndex >= 0; layerIndex--) {
 			for (int nIndex = 0; nIndex < NNetwork.networkData.hiddenLayers.get(layerIndex).size(); nIndex++) {
 				tempNeuron = NNetwork.networkData.hiddenLayers.get(layerIndex).get(nIndex);
-				trainNeuron(tempNeuron, null);
+				tempNeuron.error = computeError(tempNeuron); // grabs the error from the succeeding neurons
+				trainNeuron(tempNeuron);
 			}
 		}
-		return null;
 	}
-
-	public Double computeError(ArrayList<Double> expectedOutput) throws Exception {
-		NNetwork.computeNetworkResult(0);
-		ArrayList<Double> annOutput = NLayerToArray.obtainLayerOutputInArray(NNetwork.networkData.outputNeurons);
-		return NNetwork.errorFunction.computeError(expectedOutput, annOutput);
-	}
+	
+	
 
 }

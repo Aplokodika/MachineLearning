@@ -11,7 +11,7 @@ public class NeuralNetworkQuick extends NeuralNetwork{
 	}
 	
 	@Override
-	public void computeNetworkResult(int startIndex) throws Exception {
+	public void computeNetworkResult(int startIndex) {
 		computeNetworkResultQuick(startIndex);
 	}
 

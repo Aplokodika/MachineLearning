@@ -25,11 +25,20 @@ public class Neuron {
 	
 	
 	public Neuron(){
-		this.setNeuronIndex(newNeuronIndex());
+		this.neuronIndex = newNeuronIndex();
 	}
-	public static void reset(Integer setVal){
-		curUnusedIndex = new Integer(setVal.intValue());
+	
+	/**
+	 * This method does not copy the neuron index
+	 * @param neuron
+	 */
+	public Neuron(Neuron neuron) { 
+		this(); // call the default constructor
+		
+		this.activation = neuron.activation;
+		this.differentialValue = neuron.differentialValue;
 	}
+	
 
 	/**	newNeuronIndex
 	 *  ==============
@@ -39,7 +48,7 @@ public class Neuron {
 		if(curUnusedIndex == null){
 			curUnusedIndex = new Integer(0);
 		}
-		Integer result = new Integer(curUnusedIndex.intValue());
+		Integer result = curUnusedIndex;
 		curUnusedIndex = new Integer(curUnusedIndex.intValue() + 1);
 		return result;
 	}
@@ -56,11 +65,7 @@ public class Neuron {
 	
 	
 	// the index of the current layer. 
-	private Integer neuronIndex;
-	
-	private void setNeuronIndex(Integer neuronIndex) {
-		this.neuronIndex = neuronIndex;
-	}
+	private final Integer neuronIndex;
 	
 	public Integer getNeuronIndex() {
 		return neuronIndex;
@@ -69,6 +74,7 @@ public class Neuron {
 	
 	// The activation function of the neuron.
 	public Activation activation;
+	
 	
 	private Activation getActivation() {
 		return activation;
@@ -95,6 +101,8 @@ public class Neuron {
 	// The weight values of the forward neurons
 	public Map<Integer, Double> weightValues = new HashMap<Integer, Double>();
 	
+	public Map<Integer, Double> preChangeInWeight = new HashMap<Integer, Double>();
+	
 	public Double getWeight(Integer index){
 		return weightValues.get(index);
 	}
@@ -103,12 +111,9 @@ public class Neuron {
 	public ArrayList<Neuron> childNeurons = new ArrayList<Neuron>();
 
 	
-	public Double learningRate;
-	public Double momentum;
-	
 			
-	public Double gradient = null;
-	
+	public Double error = null;
+	public Double differentialValue = null;
 	
 	
 	/**
@@ -196,7 +201,11 @@ public class Neuron {
 		}
 		return i;
 	}
-	
+	/**
+	 * Complexity = O(n)
+	 * @param neuron
+	 * @throws Exception
+	 */
 	public void disconnectWith(Neuron neuron) throws Exception{
 		int i, j;
 		weightValues.remove(neuron.getNeuronIndex());

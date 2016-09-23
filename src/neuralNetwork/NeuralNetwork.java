@@ -59,7 +59,7 @@ public class NeuralNetwork {
 	}*/
 	
 	
-	public void computeNetworkResultQuick(int startIndex) throws Exception {
+	public void computeNetworkResultQuick(int startIndex){
 		for(int i = startIndex; i < networkData.hiddenLayers.size(); i++ ){
 			for(int j = 0; j < networkData.hiddenLayers.get(i).size(); j++){
 				networkData.hiddenLayers.get(i).get(j).pullInput();
@@ -82,20 +82,10 @@ public class NeuralNetwork {
 	 * 
 	 * @throws Exception
 	 */
-	public void computeNetworkResult(int startIndex) throws Exception {
+	public void computeNetworkResult(int startIndex){
 		
 		Map<Integer, Boolean> sessionHash = new HashMap<Integer, Boolean>();
 		
-		//Neuron.NeuronCallSession session = Neuron.reverseSession(currentSession);
-		
-		if (constructStatus == false) {
-			Exception e = new Exception("error : Network not constructed");
-			throw e;
-		}
-		if (networkData.initializedInputs == false) {
-			Exception e = new Exception("error : Inputs not initialized");
-			throw e;
-		}
 		Queue<Neuron> neuronQueue = new LinkedList<Neuron>();
 
 		// The following adds the first hidden layer's neurons into the queue

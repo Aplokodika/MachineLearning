@@ -15,7 +15,17 @@ public class ConstructNetwork  {
 	public enum NetworkResultComputationType {
 		quick, treeTraversal
 	}
-	
+	/**
+	 * 
+	 * This constructs the network, calling the method `NNetwork.networkData.initializeNeurons(sizeList, act);`
+	 * 
+	 * @param act - list of all activation functions
+	 * @param errFnc - the network's error function. This is mostly standardized, unless it is a special case
+	 * @param sizeList - the list of the number of neurons in each layer. This also holds the information to the 
+	 * 						number of layers in the network. 
+	 * @param type - There are two implementations. The treeTraversal implementation must be used for only special
+	 * 				 cases, for example when any two successive layers aren't bijective. 
+	 */
 	public ConstructNetwork( ArrayList<Activation> act, 
 			ComputeError errFnc, ArrayList<Integer> sizeList, NetworkResultComputationType type){
 		if(type.equals(NetworkResultComputationType.treeTraversal))

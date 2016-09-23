@@ -12,17 +12,42 @@ import neuralNetwork.activationFunctions.Activation;
 
 public class NetworkData{
 
+	
 	public boolean initializedInputs = false;
 	
 	public ArrayList <Neuron> inputNeurons = new ArrayList <Neuron>();
 	public ArrayList <Neuron> outputNeurons = new ArrayList <Neuron>();
-	public ArrayList <Double> expectedOutputSet = new ArrayList <Double>();
+	
+	public Double learningRate;
+	public Double momentum;
 	
 	private int noOfNeurons = 0;
 		
 	public ArrayList <ArrayList<Neuron>> hiddenLayers = new ArrayList <ArrayList<Neuron>>();
 	
 	private ArrayList <ArrayList<Neuron>> netLayers = new ArrayList<ArrayList<Neuron>>();
+	
+
+	// This holds the bias neurons. 
+	// This is initialized outside this class.
+	public ArrayList<ArrayList<Neuron>> biasNeurons = null;
+	
+	public ArrayList<ArrayList<Neuron>> getBiasNeurons(){
+		return biasNeurons;
+	}
+	
+	public void setBiasNeurons(ArrayList<ArrayList<Neuron>> bias){
+		biasNeurons = bias;
+	}
+	
+	public ArrayList <ArrayList<Neuron>> getNetLayers(){
+		return netLayers;
+	}
+	
+	public void setNetLayers(ArrayList <ArrayList<Neuron>> nLayers){
+		netLayers = nLayers;
+	}
+	
 	public ArrayList<Neuron> getLayer(int layer){
 		return netLayers.get(layer);
 	}
@@ -93,28 +118,10 @@ public class NetworkData{
 	 * @param lRate	-  the common learning rate to assign. 
 	 * @param momentum -  the common momentum value to assign. 
 	 */
-	public void setCommonLearningRateMomentum(ArrayList<Integer> sizeList, Double lRate, Double momentum){
-		int endSize = sizeList.size() - 1;
-		for(int i = 0; i < sizeList.get(0); i++){
-			inputNeurons.get(i).learningRate = lRate;
-			inputNeurons.get(i).momentum = momentum;
-		}
-		
-		// for the hidden layers
-		for (int i = 0; i < endSize - 1; i++){
-			for(int j = 0; j < sizeList.get(i + 1); j++){ 
-				// i + 1 because, sizeList stores the size for the input layer,
-			// hidden layer and the output layer. Hence it must succeed by 1		
-				hiddenLayers.get(i).get(j).learningRate = lRate;
-				hiddenLayers.get(i).get(j).momentum = momentum;
-			}
-		}
-		
-		//for output neurons
-		for(int i = 0; i < sizeList.get(endSize); i++){
-			outputNeurons.get(i).learningRate = lRate;
-			outputNeurons.get(i).momentum = momentum;
-		}
+	
+	public void setLearningRateMomentum( Double lRate, Double momentumVal){
+		learningRate = lRate;
+		momentum = momentumVal;
 	}
 	
 	int  getNoOfNeurons(){
@@ -137,5 +144,11 @@ public class NetworkData{
 		}
 	}
 	
+	public void connect(Neuron neuron1, Neuron neuron2, Double weight){
+		neuron1.connectWith(neuron2, weight);
+	}
 
+	public void disconnect(Neuron neuron1, Neuron neuron2) throws Exception{
+		neuron1.disconnectWith(neuron2);
+	}
 }
