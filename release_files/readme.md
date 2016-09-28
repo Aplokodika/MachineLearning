@@ -2,9 +2,9 @@
 
 the commands, 
 
-`cd /current/directory/where/the/source/file/is/located`
+`$ cd /current/directory/where/the/source/file/is/located`
 
-`java mainFnc.MainFnc`
+`$ java mainFnc.MainFnc`
 
 Should be able to run the test-program. 
 
